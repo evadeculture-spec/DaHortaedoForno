@@ -184,7 +184,7 @@ function hortaVignette() {
   // duas mãos, vindas de cima, a puxar o molho
   s += place(fist(ctx, { armAngle: -52, armLen: 300, taper: 18 }), 400, 252, 1.08);
   s += `<g transform="translate(386 338) scale(-1.04 1.04)">${fist(ctx, { armAngle: -64, armLen: 320, taper: 18 })}</g>`;
-  write('vinheta-horta-da-ribeira.svg', svgDoc({ w: 800, h: 600, vb: vb.join(' '), title: 'Horta da Ribeira: duas mãos puxam um molho de cenouras com rama para fora de um sulco de terra; ao fundo, os camalhões da horta.', ctx, body: printed(ctx, s, vb) }));
+  write('produtor-horta-da-ribeira.svg', svgDoc({ w: 800, h: 600, vb: vb.join(' '), title: 'Horta da Ribeira: duas mãos puxam um molho de cenouras com rama para fora de um sulco de terra; ao fundo, os camalhões da horta.', ctx, body: printed(ctx, s, vb) }));
 }
 
 function padariaVignette() {
@@ -213,7 +213,7 @@ function padariaVignette() {
   s += place(fist(ctx, { armAngle: -32, armLen: 300, sleeve: true }), 690, 548, 0.95, 62);
   // farinha caída na soleira
   s += crumbs(95, 4, [520, 450, 120, 30]);
-  write('vinheta-padaria-do-largo.svg', svgDoc({ w: 800, h: 600, vb: vb.join(' '), title: 'Padaria do Largo: uma pá de madeira puxa uma broa pela boca de um forno a lenha, com brasas ao fundo.', ctx, body: printed(ctx, s, vb) }));
+  write('produtor-padaria-do-largo.svg', svgDoc({ w: 800, h: 600, vb: vb.join(' '), title: 'Padaria do Largo: uma pá de madeira puxa uma broa pela boca de um forno a lenha, com brasas ao fundo.', ctx, body: printed(ctx, s, vb) }));
 }
 function specks(ctx, n) {
   let d = '';
@@ -226,24 +226,22 @@ function specks(ctx, n) {
 
 /* ═════════════ D. Miniaturas e estado vazio ═════════════ */
 function minis() {
-  for (const [name, contents] of [['cabaz-miniatura', 'misto'], ['cabaz-horta-miniatura', 'horta']]) {
+  for (const [name, contents] of [['cabaz-miniatura', 'misto']]) {
     const ctx = new Ctx(name.replace(/\W/g, ''));
     const vb = [70, 190, 840, 630];
     const body = `<rect x="70" y="190" width="840" height="630" fill="${C.cream}"/>` + cabazScene(ctx, { withSetting: false, detail: false, contents });
     write(`${name}.svg`, svgDoc({ w: 160, h: 120, vb: vb.join(' '), title: contents === 'misto' ? 'Miniatura do cabaz de pão e horta' : 'Miniatura do cabaz da horta', ctx, body }));
   }
-  // caixa aberta e vazia
-  const ctx = new Ctx('vazio');
-  const bx = box(ctx, { O: [70, 250], u: [220, 26], v: [0, -80], w: [110, -60], detail: false, label: false });
-  let s = hatched(ctx, poly([bx.pts.FRb, bx.pts.BRb, [430, 216], [330, 290]]), { angle: 45, gap: 6, width: 2, opacity: 0.4 });
-  s += bx.back + bx.front;
-  s += place(leaf(ctx, { L: 70, W: 34, style: 'solid', seed: 2, detail: false }), 150, 214, 1, -38);
-  write('cesto-vazio.svg', svgDoc({ w: 440, h: 300, vb: '0 60 440 260', title: '', ctx, body: s, decorative: true }));
 }
 
-hero();
-products();
+import { produtos, naturezas, panorama, cabazEstados, vinhetas, receitas } from './cenas.mjs';
 study();
 hortaVignette();
 padariaVignette();
 minis();
+produtos(cabazScene);
+naturezas(cabazScene);
+panorama();
+cabazEstados();
+vinhetas();
+receitas();

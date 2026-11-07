@@ -632,7 +632,7 @@ legend.filtros__titulo + * { clear: both; }
 .painel--baixo .resumo { border: 0; border-radius: 0; max-height: calc(100dvh - 24px); }
 .caixa-viva { position: relative; aspect-ratio: 900 / 640; }
 .caixa-viva > img { position: absolute; inset: 0; width: 100%; height: 100%; }
-.caixa-viva__itens { position: absolute; left: 21%; right: 17%; top: 13%; bottom: 33%; display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; }
+.caixa-viva__itens { position: absolute; left: 18%; right: 17%; top: 14%; bottom: 27%; display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; }
 .caixa-viva__itens img { width: var(--tam); height: auto; margin: 0 -2% -4%; filter: drop-shadow(0 2px 2px rgba(36, 62, 43, .25)); }
 @media (prefers-reduced-motion: no-preference) { .caixa-viva__itens img { animation: cai .35s cubic-bezier(.3, 1.4, .5, 1) both; } }
 @keyframes cai { from { transform: translateY(-14px); opacity: 0; } }

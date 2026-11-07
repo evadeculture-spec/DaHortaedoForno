@@ -4,9 +4,9 @@ import { esc, L, icone, img, cartao } from '../ui/comum.js';
 const HOJE = ['pao-fermentacao-lenta', 'abobora-manteiga', 'pera-rocha', 'cenouras-com-rama', 'ovos-de-galinha', 'cabaz-pao-e-horta'];
 // Etiquetas da banca, ancoradas em objetos da ilustração (posição em % da imagem)
 const ETIQUETAS = [
-  { txt: 'Ver padaria', destino: '/mercado/padaria', x: 15, y: 30, icone: 'forno' },
-  { txt: 'Fruta da época', destino: '/mercado/fruta', x: 46, y: 47, icone: 'fruta' },
-  { txt: 'Compor cabaz', destino: '/cabazes/compor', x: 80, y: 33, icone: 'caixa' },
+  { txt: 'Ver padaria', destino: '/mercado/padaria', x: 16, y: 42, icone: 'forno' },
+  { txt: 'Fruta da época', destino: '/mercado/fruta', x: 52, y: 60, icone: 'fruta' },
+  { txt: 'Compor cabaz', destino: '/cabazes/compor', x: 84, y: 54, icone: 'caixa' },
 ];
 
 export function inicio() {
