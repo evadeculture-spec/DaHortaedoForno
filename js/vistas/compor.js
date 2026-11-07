@@ -96,7 +96,7 @@ export function compor({ params }) {
     function caixaViva(suf) {
       const itens = s.itens.flatMap(([id, q]) => Array.from({ length: Math.min(q, 3) }, () => id));
       const vis = itens.slice(0, 24);
-      const tam = itens.length <= 3 ? 30 : itens.length <= 6 ? 24 : itens.length <= 10 ? 20 : itens.length <= 16 ? 16 : 13;
+      const tam = itens.length <= 3 ? 46 : itens.length <= 6 ? 40 : itens.length <= 10 ? 34 : itens.length <= 16 ? 28 : 23;
       return `<div class="caixa-viva" style="--tam:${tam}%">
         <img class="caixa-viva__fundo" src="assets/ilustracoes/caixa-fundo.svg" width="900" height="640" alt="">
         <div class="caixa-viva__itens">${vis.map((id, i) => `<img src="${C.imagemProduto(id)}" alt="" width="600" height="450" style="--i:${i}" loading="lazy">`).join('')}</div>
