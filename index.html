@@ -3,22 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <base href="/">
   <title>Da Horta e do Forno — Mercado</title>
-  <meta name="description" content="Pão de fornada, hortícolas da época e cabazes de pequenos produtores portugueses. Demonstração de conceito.">
+  <meta name="description" content="Mercado português de hortícolas, fruta, pão de forno, despensa e cabazes de pequenos produtores. Demonstração de conceito.">
   <meta name="theme-color" content="#F4F0E4">
   <link rel="icon" href="assets/brand/simbolo.svg" type="image/svg+xml">
-  <link rel="preload" href="assets/ilustracoes/cabaz-hero.svg" as="image" type="image/svg+xml" fetchpriority="high">
   <link rel="preload" href="assets/fontes/spectral-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fontes/dm-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/estilos.css">
+  <script type="module" src="js/app.js"></script>
 </head>
 <body>
-  <!-- Ícones: 24 px, traço em currentColor -->
   <svg width="0" height="0" class="sprite" aria-hidden="true" focusable="false">
     <defs>
       <symbol id="i-cesto" viewBox="0 0 24 24"><path d="M3.5 10.5h17l-1.6 9.1a1.5 1.5 0 0 1-1.5 1.2H6.6a1.5 1.5 0 0 1-1.5-1.2z"/><path d="M3.5 10.5 6 7.2M20.5 10.5 18 7.2"/><path d="M7.2 10.4c.2-3.1 2.2-5.1 4.8-5.1s4.6 2 4.8 5.1"/><path d="M9.6 6.2c.6.9 1.4 1.4 2.4 1.4s1.8-.5 2.4-1.4"/><path d="M8.5 14.3h7"/></symbol>
       <symbol id="i-horta" viewBox="0 0 24 24"><path d="M2.8 20.2c3.6-2.6 14.8-2.6 18.4 0"/><path d="M5 16.6c3-1.8 11-1.8 14 0"/><path d="M12 15.6V9.8"/><path d="M12 11.2C10.9 8 8.3 6.6 5.2 6.9c.3 3 2.6 4.8 6.8 4.3z"/><path d="M12 9.6c.9-3.4 3.6-5.1 6.9-4.7-.2 3.3-2.7 5.2-6.9 4.7z"/></symbol>
       <symbol id="i-forno" viewBox="0 0 24 24"><path d="M3 19.5h18"/><path d="M4.6 19.5V15a7.4 7.4 0 0 1 14.8 0v4.5"/><path d="M8.6 19.5v-3.2a3.4 3.4 0 0 1 6.8 0v3.2"/><path d="M10 3.2h4M10.6 3.2v4.5h2.8V3.2"/><path d="M12 15.2c-.9.8-1.2 1.6-.6 2.5.4.6 1.4.6 1.8-.1.4-.8-.1-1.7-1.2-2.4z"/></symbol>
+      <symbol id="i-fruta" viewBox="0 0 24 24"><path d="M12 7.6c-2.1-1.6-6.6-1.3-7.2 3.4-.5 4 2.3 9 5 9 .9 0 1.4-.5 2.2-.5s1.3.5 2.2.5c2.7 0 5.5-5 5-9-.6-4.7-5.1-5-7.2-3.4z"/><path d="M12 7.6c0-1.8.4-3.3 1.6-4.4"/><path d="M12.6 5.4c1.4-1.8 3.8-2 5-1.3-.8 1.6-2.9 2.3-5 1.3z"/></symbol>
+      <symbol id="i-erva" viewBox="0 0 24 24"><path d="M12 21V8"/><path d="M12 12.5c-2.6-.2-4.5-2.1-4.6-4.7 2.6.1 4.4 2 4.6 4.7z"/><path d="M12 10c2.6-.2 4.5-2.1 4.6-4.7-2.6.1-4.4 2-4.6 4.7z"/><path d="M12 16.8c-3-.1-5.2-2.3-5.3-5.3 3 .1 5.1 2.3 5.3 5.3z"/><path d="M12 15c3-.1 5.2-2.3 5.3-5.3-3 .1-5.1 2.3-5.3 5.3z"/><path d="M12 8c0-1.6.5-3.1 1.4-4.3"/></symbol>
+      <symbol id="i-saco" viewBox="0 0 24 24"><path d="M6.5 8.5h11l1.3 11.2a1 1 0 0 1-1 1.1H6.2a1 1 0 0 1-1-1.1z"/><path d="M6.5 8.5 8 4.6h8l1.5 3.9"/><path d="M9.5 4.6c.6 1.1 1.4 1.6 2.5 1.6s1.9-.5 2.5-1.6"/><path d="M9 13.5h6M9.8 16.5h4.4"/></symbol>
+      <symbol id="i-frasco" viewBox="0 0 24 24"><path d="M7.5 8.8h9v10a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2z"/><path d="M7 5.6h10v3.2H7z"/><path d="M6.4 5.6c1.6-.9 3.4-1.4 5.6-1.4s4 .5 5.6 1.4"/><path d="M9.5 12.5h5v4h-5z"/></symbol>
+      <symbol id="i-ovo" viewBox="0 0 24 24"><path d="M12 3.4c-3.5 0-6.3 5.4-6.3 9.6a6.3 6.3 0 0 0 12.6 0c0-4.2-2.8-9.6-6.3-9.6z"/><path d="M9.2 13.4c.2 1.6 1.2 2.7 2.6 3"/></symbol>
       <symbol id="i-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
       <symbol id="i-menos" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
       <symbol id="i-fechar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
@@ -27,152 +32,67 @@
       <symbol id="i-remover" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.2a1.5 1.5 0 0 0 1.5 1.3h6.2a1.5 1.5 0 0 0 1.5-1.3L17.5 7M10 10.5v6M14 10.5v6"/></symbol>
       <symbol id="i-seta-esq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
       <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-chevron-baixo" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+      <symbol id="i-chevron-dir" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+      <symbol id="i-chevron-esq" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+      <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></symbol>
+      <symbol id="i-coracao" viewBox="0 0 24 24"><path d="M12 19.6s-7.6-4.6-7.6-10a4.2 4.2 0 0 1 7.6-2.5 4.2 4.2 0 0 1 7.6 2.5c0 5.4-7.6 10-7.6 10z"/></symbol>
+      <symbol id="i-coracao-cheio" viewBox="0 0 24 24"><path d="M12 19.6s-7.6-4.6-7.6-10a4.2 4.2 0 0 1 7.6-2.5 4.2 4.2 0 0 1 7.6 2.5c0 5.4-7.6 10-7.6 10z" fill="currentColor"/></symbol>
+      <symbol id="i-filtro" viewBox="0 0 24 24"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></symbol>
+      <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-pessoas" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.8 19c.6-3.2 2.6-5 5.2-5s4.6 1.8 5.2 5"/><circle cx="16.5" cy="9.5" r="2.4"/><path d="M15.3 14.3c2.6-.4 4.4 1.2 5 4"/></symbol>
+      <symbol id="i-editar" viewBox="0 0 24 24"><path d="M4.5 19.5l1-4.2L15.8 5a1.8 1.8 0 0 1 2.5 0l.7.7a1.8 1.8 0 0 1 0 2.5L8.7 18.5z"/><path d="M13.8 7l3.2 3.2"/></symbol>
+      <symbol id="i-guardar" viewBox="0 0 24 24"><path d="M6.5 4.5h11v15.5L12 16.2 6.5 20z"/></symbol>
+      <symbol id="i-caixa" viewBox="0 0 24 24"><path d="M3.5 9.5 12 13l8.5-3.5"/><path d="M3.5 9.5v8L12 21l8.5-3.5v-8"/><path d="M12 13v8"/><path d="M3.5 9.5 6 5.5l8.5-1.6 6 5.6"/><path d="M6 5.5l8.4 3.7"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.2-5.6-6.2-10.6a6.2 6.2 0 0 1 12.4 0C18.2 15.4 12 21 12 21z"/><circle cx="12" cy="10.4" r="2.2"/></symbol>
     </defs>
   </svg>
 
-  <a class="skip" href="#mercado">Saltar para o mercado</a>
+  <a class="salto" href="#conteudo" data-salto>Saltar para o conteúdo</a>
 
-  <header class="site-header" id="topo">
-    <div class="site-header__inner wrap">
-      <a class="brand" href="#inicio">
-        <img class="brand__lockup" src="assets/brand/logotipo-horizontal.svg" width="474" height="124" alt="Da Horta e do Forno">
-        <img class="brand__symbol" src="assets/brand/simbolo.svg" width="427" height="325" alt="Da Horta e do Forno">
-      </a>
-
-      <nav class="nav" aria-label="Principal">
-        <ul class="nav__list" id="nav-lista">
-          <li><a class="nav__link" href="#mercado">Mercado</a></li>
-          <li><a class="nav__link" href="#produtores">Produtores</a></li>
-        </ul>
-      </nav>
-
-      <button class="cart-btn" type="button" data-abrir-cesto aria-haspopup="dialog">
-        <span class="cart-btn__icon" aria-hidden="true"><svg class="icon"><use href="#i-cesto"/></svg></span>
-        <span class="cart-btn__label">Cesto</span>
-        <span class="cart-btn__count">(<span data-contador>0</span>)</span>
-      </button>
-
-      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-lista">
-        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
-        <span>Menu</span>
-      </button>
+  <header class="cab" data-cab>
+    <div class="cab__topo">
+      <div class="cab__barra wrap">
+        <button class="cab__menu-btn icone-btn" type="button" aria-expanded="false" aria-controls="painel-menu" data-abrir-menu>
+          <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="sr-only">Abrir menu</span>
+        </button>
+        <a class="marca" href="/" aria-label="Da Horta e do Forno — início">
+          <img class="marca__lockup" src="assets/brand/logotipo-horizontal.svg" width="474" height="124" alt="Da Horta e do Forno">
+          <img class="marca__simbolo" src="assets/brand/simbolo.svg" width="427" height="325" alt="">
+        </a>
+        <div class="cab__pesquisa" data-pesquisa-topo></div>
+        <div class="cab__acoes">
+          <button class="icone-btn cab__lupa" type="button" data-abrir-pesquisa aria-haspopup="dialog">
+            <svg class="icon" aria-hidden="true"><use href="#i-lupa"/></svg><span class="sr-only">Pesquisar</span>
+          </button>
+          <a class="cab__acao" href="/favoritos">
+            <svg class="icon" aria-hidden="true"><use href="#i-coracao"/></svg><span class="cab__acao-txt">Favoritos</span><span class="contador" data-num-fav>0</span>
+          </a>
+          <button class="cab__cesto" type="button" data-abrir-cesto data-cesto-botao aria-haspopup="dialog">
+            <span class="cab__cesto-icone" aria-hidden="true"><svg class="icon"><use href="#i-cesto"/></svg></span>
+            <span class="cab__cesto-txt">Cesto</span>
+            <span class="cab__cesto-num">(<span data-num-cesto>0</span>)</span>
+          </button>
+        </div>
+      </div>
     </div>
+    <nav class="cab__nav" aria-label="Principal" data-nav></nav>
   </header>
 
-  <main id="inicio">
-    <!-- ABERTURA -->
-    <section class="hero" aria-labelledby="hero-titulo">
-      <div class="hero__inner wrap">
-        <div class="hero__text">
-          <h1 id="hero-titulo" class="hero__title">Da terra e do forno, para a tua mesa.</h1>
-          <p class="hero__lead">Pão de fornada, hortícolas da época e cabazes de pequenos produtores portugueses.</p>
-          <div class="hero__actions">
-            <a class="btn btn--primary" href="#mercado">Explorar o mercado<svg class="icon" aria-hidden="true"><use href="#i-seta-dir"/></svg></a>
-            <a class="btn btn--ghost" href="#produtores">Conhecer os produtores</a>
-          </div>
-        </div>
-        <div class="hero__art">
-          <img src="assets/ilustracoes/cabaz-hero.svg" width="1000" height="550" fetchpriority="high" decoding="async"
-               alt="Ilustração: cabaz de cartão da marca aberto numa bancada, com pão num saco de papel, broa de milho, couve e cenouras com rama; ao fundo, a boca de um forno a lenha.">
-        </div>
-      </div>
-    </section>
+  <main id="conteudo" tabindex="-1" data-app></main>
 
-    <!-- MERCADO -->
-    <section class="market" id="mercado" aria-labelledby="mercado-titulo">
-      <div class="wrap">
-        <div class="market__head">
-          <h2 id="mercado-titulo" class="section-title" tabindex="-1">Hoje no mercado</h2>
-          <fieldset class="filters">
-            <legend class="sr-only">Filtrar produtos por categoria</legend>
-            <div class="filters__list" data-filtros></div>
-          </fieldset>
-        </div>
-        <div class="market__status">
-          <p class="market__count" data-resultado aria-live="polite"></p>
-          <div class="producer-filter" data-filtro-produtor hidden>
-            <span class="producer-filter__label">Produtor: <strong data-filtro-produtor-nome></strong></span>
-            <button class="producer-filter__remove" type="button" data-remover-produtor>
-              <svg class="icon" aria-hidden="true"><use href="#i-fechar"/></svg>
-              Remover filtro<span class="sr-only"> de produtor</span>
-            </button>
-          </div>
-        </div>
-        <ul class="grid" data-grelha></ul>
-        <div class="market__empty" data-vazio hidden>
-          <p>Não há produtos deste produtor nesta categoria.</p>
-          <button class="btn btn--ghost" type="button" data-limpar-filtros>Limpar filtros</button>
-        </div>
-      </div>
-    </section>
+  <footer class="rodape" data-rodape></footer>
 
-    <!-- PRODUTORES -->
-    <section class="producers" id="produtores" aria-labelledby="produtores-titulo">
-      <div class="wrap">
-        <h2 id="produtores-titulo" class="section-title">Quem cultiva e quem amassa</h2>
-        <div class="producers__list">
-          <article class="producer" aria-labelledby="p-horta">
-            <figure class="producer__art">
-              <img src="assets/ilustracoes/vinheta-horta-da-ribeira.svg" width="800" height="600" loading="lazy" decoding="async"
-                   alt="Duas mãos puxam um molho de cenouras com rama para fora de um sulco de terra.">
-            </figure>
-            <p class="producer__kicker"><svg class="icon" aria-hidden="true"><use href="#i-horta"/></svg>Horta · Beira Baixa</p>
-            <h3 id="p-horta" class="producer__name">Horta da Ribeira</h3>
-            <p class="producer__text">Uma horta fictícia na Beira Baixa, com talhões de couve, cenoura e tomate regados pela ribeira que lhe dá o nome. As cenouras são arrancadas à mão e atadas em molho com a rama, tal como chegam ao mercado.</p>
-            <a class="link-arrow" href="#mercado" data-ver-produtor="horta-da-ribeira">Ver produtos<span class="sr-only"> da Horta da Ribeira</span><svg class="icon" aria-hidden="true"><use href="#i-seta-dir"/></svg></a>
-          </article>
-          <article class="producer" aria-labelledby="p-padaria">
-            <figure class="producer__art">
-              <img src="assets/ilustracoes/vinheta-padaria-do-largo.svg" width="800" height="600" loading="lazy" decoding="async"
-                   alt="Uma pá de madeira puxa uma broa pela boca de um forno a lenha.">
-            </figure>
-            <p class="producer__kicker"><svg class="icon" aria-hidden="true"><use href="#i-forno"/></svg>Padaria · Forno a lenha</p>
-            <h3 id="p-padaria" class="producer__name">Padaria do Largo</h3>
-            <p class="producer__text">Uma padaria fictícia de forno a lenha, numa casa de esquina virada para o largo da vila. Amassa pão de fermentação lenta e broa de milho, que entram e saem do forno na pá de madeira.</p>
-            <a class="link-arrow" href="#mercado" data-ver-produtor="padaria-do-largo">Ver produtos<span class="sr-only"> da Padaria do Largo</span><svg class="icon" aria-hidden="true"><use href="#i-seta-dir"/></svg></a>
-          </article>
-        </div>
-      </div>
-    </section>
-  </main>
+  <!-- Menu do telemóvel/tablet: painel com níveis -->
+  <dialog class="painel painel--esq" id="painel-menu" aria-labelledby="painel-menu-titulo" data-painel-menu></dialog>
+  <!-- Pesquisa no telemóvel/tablet -->
+  <dialog class="painel painel--topo" id="painel-pesquisa" aria-label="Pesquisar no mercado" data-painel-pesquisa></dialog>
+  <!-- Cesto -->
+  <dialog class="painel painel--dir gaveta" id="cesto" aria-labelledby="cesto-titulo" data-gaveta-cesto></dialog>
+  <!-- Confirmações -->
+  <dialog class="confirmar" id="confirmar" aria-labelledby="confirmar-titulo" data-confirmar></dialog>
 
-  <footer class="site-footer">
-    <div class="wrap site-footer__inner">
-      <img class="site-footer__logo" src="assets/brand/logotipo-vertical-negativo.svg" width="553" height="379" loading="lazy" alt="Da Horta e do Forno">
-      <nav class="site-footer__nav" aria-label="Rodapé">
-        <ul>
-          <li><a href="#mercado">Mercado</a></li>
-          <li><a href="#produtores">Produtores</a></li>
-          <li><button type="button" data-abrir-cesto aria-haspopup="dialog">Cesto</button></li>
-          <li><a href="#inicio">Voltar ao início</a></li>
-        </ul>
-      </nav>
-      <p class="site-footer__note">Demonstração de conceito. Produtos, produtores e preços ilustrativos.</p>
-    </div>
-  </footer>
-
-  <!-- FICHA DE PRODUTO -->
-  <dialog class="sheet" id="ficha" aria-labelledby="ficha-titulo">
-    <div class="sheet__panel" data-ficha></div>
-  </dialog>
-
-  <!-- CESTO -->
-  <dialog class="drawer" id="cesto" aria-labelledby="cesto-titulo">
-    <div class="drawer__panel">
-      <div class="drawer__head">
-        <h2 class="drawer__title" id="cesto-titulo" tabindex="-1">O teu cesto</h2>
-        <button class="icon-btn" type="button" data-fechar>
-          <svg class="icon" aria-hidden="true"><use href="#i-fechar"/></svg><span class="sr-only">Fechar cesto</span>
-        </button>
-      </div>
-      <div class="drawer__body" data-cesto-corpo></div>
-      <div class="drawer__foot" data-cesto-base></div>
-    </div>
-  </dialog>
-
+  <div class="toast" data-toast role="status" hidden></div>
   <div class="sr-only" aria-live="polite" aria-atomic="true" data-anuncio></div>
-
-  <script src="js/catalogo.js"></script>
-  <script src="js/app.js"></script>
 </body>
 </html>

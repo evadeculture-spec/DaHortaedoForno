@@ -1,7 +1,15 @@
-# Site estático, sem passo de build: a raiz do repositório é publicada tal como está.
+# Site estático, sem dependências. O comando de build só valida o catálogo e as ligações
+# (72 produtos, bancas, produtores, receitas, cabazes e imagens) antes de publicar.
 [build]
   publish = "."
-  command = ""
+  command = "node tools/verificar-catalogo.mjs"
+
+# Caminhos legíveis (/mercado/padaria, /produto/broa-de-milho…): ficheiros existentes são
+# servidos tal como estão; qualquer outro caminho devolve a aplicação.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 [[headers]]
   for = "/assets/*"

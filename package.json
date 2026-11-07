@@ -1,14 +1,14 @@
 {
   "name": "da-horta-e-do-forno",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Landing page com mercado de demonstração — Da Horta e do Forno",
+  "type": "module",
+  "description": "Mercado de demonstração — Da Horta e do Forno",
   "scripts": {
-    "start": "python3 -m http.server 8080",
+    "start": "node tools/servidor.mjs 8080",
     "ilustracoes": "node tools/ilustracoes/build.mjs",
-    "test": "node tests/percurso.spec.js http://localhost:8080/"
-  },
-  "devDependencies": {
-    "playwright": "^1.47.0"
+    "verificar": "node tools/verificar-catalogo.mjs",
+    "build": "node tools/ilustracoes/build.mjs && node tools/verificar-catalogo.mjs",
+    "test": "node tests/percurso.spec.cjs http://localhost:8080/"
   }
 }
