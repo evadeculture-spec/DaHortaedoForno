@@ -1,8 +1,8 @@
-# Site estático, sem dependências. O comando de build só valida o catálogo e as ligações
-# (72 produtos, bancas, produtores, receitas, cabazes e imagens) antes de publicar.
+# Site estático, sem dependências e sem passo de build: a raiz é publicada tal como está.
+# A validação do catálogo corre localmente com `npm run build` (ver README).
 [build]
   publish = "."
-  command = "node tools/verificar-catalogo.mjs"
+  command = ""
 
 # Caminhos legíveis (/mercado/padaria, /produto/broa-de-milho…): ficheiros existentes são
 # servidos tal como estão; qualquer outro caminho devolve a aplicação.
