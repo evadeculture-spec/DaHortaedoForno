@@ -261,7 +261,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .secao-cab .secao-titulo { flex: 1 1 320px; }
 .secao-nota { color: var(--suave); font-size: .9375rem; }
 .cab-secao { display: grid; gap: var(--e-2) var(--e-6); align-items: end; }
-@media (min-width: 900px) { .cab-secao { grid-template-columns: minmax(0, 1fr) auto; } .cab-secao__lead { grid-column: 1; } .cab-secao > .ligacao { grid-column: 2; grid-row: 1 / span 3; } }
+@media (min-width: 900px) { .cab-secao { grid-template-columns: minmax(0, 1fr) auto; } .cab-secao > * { grid-column: 1; } .cab-secao > .ligacao { grid-column: 2; grid-row: 1 / span 3; } }
 .cab-secao h2 { font-size: var(--t-h2); letter-spacing: -.018em; }
 .cab-secao h2 em { font-weight: 400; }
 .cab-secao__lead { max-width: 56ch; font-size: var(--t-l); color: var(--suave); }
