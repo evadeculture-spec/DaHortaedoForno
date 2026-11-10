@@ -244,7 +244,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .pg-compor ~ .toast, body:has(.pg-compor) .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
 
 /* ───────── tipografia de página ───────── */
-.app { min-height: 60vh; }
+.app { min-height: 100vh; }
 .trilho ol { display: flex; flex-wrap: wrap; gap: 4px 0; padding-top: 16px; font-size: .875rem; color: var(--suave); }
 .trilho li:not(:last-child)::after { content: "›"; margin: 0 8px; color: var(--linha-forte); }
 .trilho a { display: inline-block; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linha-forte); }
@@ -973,3 +973,10 @@ button.conta-cartao { font: inherit; color: inherit; }
   .abertura__acoes { margin-top: var(--e-4); }
   .abertura__factos { display: none; }
 }
+
+/* afinações */
+.conta-cartao .conta-cartao__n { color: var(--texto); font-size: 2.75rem; }
+@media (max-width: 479.98px) { .etapas li + li::before { width: 12px; margin: 0 6px; } .etapas { flex-wrap: nowrap; font-size: var(--t-xs); } .etapas li { gap: 5px; white-space: nowrap; } }
+@media (max-width: 719.98px) { .ficha__add-extra { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ficha__add { white-space: nowrap; } }
+@media (max-width: 479.98px) { .compor__etapas { flex-wrap: wrap; gap: 6px 14px; } .compor__etapas li + li::before { display: none; } }
+@media (min-width: 900px) { .cab__nav { min-height: 47px; } }

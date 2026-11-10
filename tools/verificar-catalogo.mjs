@@ -2,7 +2,7 @@
 // Falha o processo se algum destino estiver quebrado.
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS } from '../js/dados/catalogo.js';
+import { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS, MES_DO_MERCADO } from '../js/dados/catalogo.js';
 
 const raiz = fileURLToPath(new URL('..', import.meta.url));
 const erros = [];
@@ -62,6 +62,12 @@ for (const r of RECEITAS) {
   if (r.acompanha) verificar(prod.has(r.acompanha), `${r.id}: acompanhamento existe`);
 }
 for (const pt of PARTIDAS) for (const [id, q] of pt.itens) verificar(prod.has(id) && prod.get(id).banca !== 'cabazes' && q > 0, `partida ${pt.id}: ${id}`);
+// disponibilidade: cabazes prontos e pontos de partida só com artigos da época
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const naEpoca = (p) => { const r = /^(\p{L}+) a (\p{L}+)/u.exec(p.epoca || ''); if (!r) return true; const a = MESES.indexOf(r[1].toLowerCase()) + 1, b = MESES.indexOf(r[2].toLowerCase()) + 1; return a <= b ? MES_DO_MERCADO >= a && MES_DO_MERCADO <= b : MES_DO_MERCADO >= a || MES_DO_MERCADO <= b; };
+for (const p of PRODUTOS) for (const [id] of p.composicao || []) verificar(naEpoca(prod.get(id)), `${p.id}: ${id} está na época`);
+for (const pt of PARTIDAS) for (const [id] of pt.itens) verificar(naEpoca(prod.get(id)), `partida ${pt.id}: ${id} está na época`);
+for (const p of PRODUTOS) verificar(Array.isArray(p.alergenios) && Array.isArray(p.etiquetas) && p.origem && p.curta && p.slug === p.id, `${p.id}: modelo completo (slug, curta, origem, alergénios, atributos)`);
 for (const c of COLECOES) verificar(ficheiro(c.imagem), `imagem da coleção ${c.id}`);
 for (const f of ['assets/ilustracoes/banca-mercado.svg', 'assets/ilustracoes/cabaz-vazio.svg', 'assets/ilustracoes/cabaz-composicao.svg', 'assets/ilustracoes/cabaz-completo.svg', 'assets/ilustracoes/caixa-fundo.svg', 'assets/ilustracoes/caixa-frente.svg', 'assets/ilustracoes/cabaz-miniatura.svg', 'assets/ilustracoes/cabaz-estudo.svg']) verificar(ficheiro(f), `recurso ${f}`);
 

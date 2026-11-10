@@ -4,6 +4,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const raiz = fileURLToPath(new URL('..', import.meta.url));
@@ -18,7 +19,10 @@ createServer(async (req, res) => {
     const s = await stat(ficheiro);
     if (s.isDirectory()) ficheiro = join(ficheiro, 'index.html');
     const corpo = await readFile(ficheiro);
-    res.writeHead(200, { 'Content-Type': tipos[extname(ficheiro)] || 'application/octet-stream' }).end(corpo);
+    const tipo = tipos[extname(ficheiro)] || 'application/octet-stream';
+    // a Netlify comprime texto e SVG; o servidor local faz o mesmo para as medições serem comparáveis
+    const comprimir = /text|javascript|svg|json/.test(tipo) && /gzip/.test(req.headers['accept-encoding'] || '');
+    res.writeHead(200, { 'Content-Type': tipo, ...(comprimir ? { 'Content-Encoding': 'gzip' } : {}) }).end(comprimir ? gzipSync(corpo) : corpo);
   } catch {
     if (extname(caminho)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Não encontrado'); return; }
     res.writeHead(200, { 'Content-Type': tipos['.html'] }).end(await readFile(join(raiz, 'index.html')));

@@ -11,6 +11,23 @@
   <link rel="preload" href="assets/fontes/spectral-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fontes/dm-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/estilos.css">
+  <script>if (location.pathname === '/') document.head.insertAdjacentHTML('beforeend', '<link rel="preload" as="image" type="image/svg+xml" href="assets/ilustracoes/banca-mercado.svg" fetchpriority="high">');</script>
+  <link rel="modulepreload" href="js/router.js">
+  <link rel="modulepreload" href="js/dados/catalogo.js">
+  <link rel="modulepreload" href="js/loja/catalogo.js">
+  <link rel="modulepreload" href="js/loja/estado.js">
+  <link rel="modulepreload" href="js/ui/comum.js">
+  <link rel="modulepreload" href="js/ui/cabecalho.js">
+  <link rel="modulepreload" href="js/ui/cesto.js">
+  <link rel="modulepreload" href="js/ui/dialogos.js">
+  <link rel="modulepreload" href="js/vistas/inicio.js">
+  <link rel="modulepreload" href="js/vistas/mercado.js">
+  <link rel="modulepreload" href="js/vistas/produto.js">
+  <link rel="modulepreload" href="js/vistas/produtores.js">
+  <link rel="modulepreload" href="js/vistas/receitas.js">
+  <link rel="modulepreload" href="js/vistas/compor.js">
+  <link rel="modulepreload" href="js/vistas/paginas.js">
+  <link rel="modulepreload" href="js/vistas/apoio.js">
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
@@ -70,7 +87,7 @@
             <svg class="icon" aria-hidden="true"><use href="#i-pessoa"/></svg><span class="cab__acao-txt">Conta</span>
           </a>
           <a class="cab__acao" href="/favoritos">
-            <svg class="icon" aria-hidden="true"><use href="#i-coracao"/></svg><span class="cab__acao-txt">Favoritos</span><span class="contador" data-num-fav>0</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-coracao"/></svg><span class="cab__acao-txt">Favoritos</span><span class="contador" data-num-fav hidden>0</span>
           </a>
           <button class="cab__cesto" type="button" data-abrir-cesto data-cesto-botao aria-haspopup="dialog">
             <span class="cab__cesto-icone" aria-hidden="true"><svg class="icon"><use href="#i-cesto"/></svg></span>
@@ -83,7 +100,7 @@
     <nav class="cab__nav" aria-label="Principal" data-nav></nav>
   </header>
 
-  <main id="conteudo" tabindex="-1" data-app></main>
+  <main id="conteudo" class="app" tabindex="-1" data-app></main>
 
   <footer class="rodape" data-rodape></footer>
 

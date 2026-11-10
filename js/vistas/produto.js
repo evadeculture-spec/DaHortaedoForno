@@ -86,7 +86,7 @@ export function produto({ id }) {
             <input class="qtd__campo" type="number" inputmode="numeric" min="1" max="${E.MAX}" value="1" aria-label="Unidades a adicionar" data-qtd>
             <button type="button" class="qtd__btn" data-q="1" aria-label="Mais uma unidade">${icone('mais')}</button>
           </div>
-          <button type="button" class="btn btn--primario ficha__add" data-add-ficha>${icone('cesto')}<span>Adicionar ao cesto</span><span class="ficha__add-preco" data-add-preco></span></button>
+          <button type="button" class="btn btn--primario ficha__add" data-add-ficha>${icone('cesto')}<span>Adicionar<span class="ficha__add-extra"> ao cesto</span></span><span class="ficha__add-preco" data-add-preco></span></button>
         </div>
         <p class="ficha__resumo" data-resumo aria-live="polite"></p>
         <p class="ficha__nocesto" data-nocesto></p>` : `<div class="ficha__indisponivel"><strong>Fora de época</strong><p>${esc(disp.nota)}. Podes guardá-lo nos favoritos para o encontrares depressa quando voltar à banca.</p></div>`}

@@ -1,6 +1,6 @@
 # Da Horta e do Forno — mercado de demonstração
 
-Loja de demonstração de um mercado português: 72 artigos em 8 bancas, 9 produtores, cabazes prontos, o configurador "Compor o meu cabaz", receitas com compra de ingredientes, favoritos e cesto com revisão da encomenda.
+Loja de demonstração de um mercado português: 72 artigos em 8 bancas, 9 produtores, cabazes prontos, o configurador "Compor o meu cabaz", receitas com compra de ingredientes, favoritos, cesto e revisão da encomenda em página própria.
 
 O site é estático: HTML, CSS e módulos ES, sem dependências. Os dados são locais e ilustrativos, e nada é cobrado nem encomendado.
 
@@ -18,15 +18,28 @@ Rotas legíveis disponíveis:
 - `/produtores` e `/produtores/<id>`
 - `/receitas` e `/receitas/<id>`
 - `/favoritos` e `/a-marca`
+- `/encomenda` (revisão e conclusão da demonstração)
+- `/conta`, `/ajuda` e `/legal`
 
-A pesquisa, os filtros, a ordenação e o "Mostrar mais" ficam guardados no URL.
+A pesquisa, os filtros (banca, produtor, disponibilidade, atributos, preço), a ordenação e o "Mostrar mais" ficam guardados no URL.
+
+## Disponibilidade por época
+
+O mercado de demonstração decorre no mês definido em `MES_DO_MERCADO` (`js/dados/catalogo.js`, 11 = novembro). A disponibilidade dos frescos é calculada a partir do campo `epoca` de cada produto:
+
+- dentro da época: "Da época";
+- no último mês da época: "Fim de época";
+- fora da época: "Fora de época", com o mês em que volta. Estes artigos mantêm a ficha, mas não se podem comprar nem pôr num cabaz.
+
+O verificador do catálogo garante que nenhum cabaz pronto nem ponto de partida do configurador contém artigos fora de época.
 
 ## Onde editar
 
 | O quê | Onde |
 | --- | --- |
 | Produtos, preços (em cêntimos), unidades, produtores, bancas, coleções, cabazes, pontos de partida do configurador e receitas | `js/dados/catalogo.js` |
-| Cores, tipografia e espaçamentos da identidade | `:root` em `css/estilos.css` |
+| Cores, escala tipográfica, espaçamentos, raios e durações (tokens) | `:root` em `css/estilos.css` |
+| Alergénios e atributos dos produtos | `ALERGENIOS` e `ETIQUETAS` em `js/dados/catalogo.js` |
 | Logótipo (vetorizado a partir da prancha oficial) | `assets/brand/` |
 | Ilustrações de produto (uma por id) | geradas em `assets/produtos/<id>.svg`; desenho em `tools/ilustracoes/produtos.mjs` (`DESENHOS`) |
 | Banca panorâmica, naturezas-mortas, coleção, vinhetas, pratos, cabaz em três estados | geradas em `assets/ilustracoes/`; desenho em `tools/ilustracoes/cenas.mjs` |
@@ -65,12 +78,21 @@ npm start &
 npm test           # tests/percurso.spec.cjs (requer Playwright)
 ```
 
-O teste percorre os cenários do brief:
+O teste cobre 16 grupos de verificação:
 
-- **A.** Megamenu por toque no iPad, Padaria, broa e regresso à mesma posição.
-- **B.** "pao" e "grao", com filtros reproduzidos pelo URL.
-- **C.** 30,60 € → 25,80 €.
-- **D.** Configurador: 10,60 € → 7,00 € no mesmo grupo.
-- **E.** Favoritos e composições sobrevivem à conclusão.
-- **F.** Dois ingredientes de uma receita.
-- **Também:** links diretos após atualizar a página, painel móvel e teclado.
+- homepage e primeiro ecrã no iPad horizontal;
+- megamenu por toque e as 8 bancas com 9 artigos cada;
+- os 72 artigos no mercado;
+- ficha com galeria e alergénios, e regresso à mesma posição;
+- pesquisa sem acentos, por descrição, limpar e estado sem resultados;
+- filtros, ordenação e reprodução pelo URL;
+- cesto (30,60 € → 25,80 €, persistência, remoção) e artigo fora de época;
+- favoritos;
+- configurador (10,60 € → 7,00 € no mesmo grupo);
+- encomenda e conclusão;
+- receitas e produtores;
+- a minha área, ajuda e privacidade;
+- links diretos, página não encontrada e imagem em falta;
+- ausência de deslocação horizontal em 7 larguras (320 a 1440 px) e 13 páginas;
+- teclado e painel móvel;
+- ausência de erros de execução.
