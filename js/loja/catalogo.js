@@ -1,7 +1,7 @@
 // Índices derivados do catálogo, formatação e pesquisa. Única fonte de preços: PRODUTOS[].preco.
-import { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS, GRUPOS_MERCADO } from '../dados/catalogo.js';
+import { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS, GRUPOS_MERCADO, MES_DO_MERCADO } from '../dados/catalogo.js';
 
-export { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS, GRUPOS_MERCADO };
+export { BANCAS, PRODUTORES, PRODUTOS, RECEITAS, COLECOES, PARTIDAS, GRUPOS_MERCADO, MES_DO_MERCADO };
 
 export const produto = new Map(PRODUTOS.map((p) => [p.id, p]));
 export const banca = new Map(BANCAS.map((b) => [b.id, b]));
@@ -15,6 +15,30 @@ export const imagemBanca = (id) => `assets/ilustracoes/banca-${id}.svg`;
 export const imagemProdutor = (id) => `assets/ilustracoes/produtor-${id}.svg`;
 export const imagemReceita = (id) => `assets/ilustracoes/receita-${id}.svg`;
 export const ehCabaz = (id) => produto.get(id)?.banca === 'cabazes';
+
+/* ---------- época e disponibilidade (calculadas a partir de `epoca` e do mês do mercado) ---------- */
+export const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+/** “Junho a outubro” → [6, 10]; “Todo o ano” → null */
+export function mesesDe(epoca) {
+  const r = /^(\p{L}+) a (\p{L}+)/u.exec(epoca || '');
+  if (!r) return null;
+  const a = MESES.indexOf(r[1].toLowerCase()) + 1, b = MESES.indexOf(r[2].toLowerCase()) + 1;
+  return a && b ? [a, b] : null;
+}
+const dentro = ([a, b], m) => (a <= b ? m >= a && m <= b : m >= a || m <= b);
+/** { estado: 'disponivel' | 'fim' | 'fora', rotulo, nota } */
+export function disponibilidade(p) {
+  const m = mesesDe(p.epoca);
+  if (!m) return { estado: 'disponivel', rotulo: 'Disponível', nota: p.epoca ? p.epoca : '' };
+  if (!dentro(m, MES_DO_MERCADO)) return { estado: 'fora', rotulo: 'Fora de época', nota: `Volta em ${MESES[m[0] - 1]}` };
+  if (m[1] === MES_DO_MERCADO) return { estado: 'fim', rotulo: 'Fim de época', nota: `Última colheita em ${MESES[m[1] - 1]}` };
+  return { estado: 'disponivel', rotulo: 'Da época', nota: `Época: ${p.epoca.toLowerCase()}` };
+}
+export const disponivel = (id) => disponibilidade(produto.get(id)).estado !== 'fora';
+export const daEpoca = (p) => !!mesesDe(p.epoca) && disponivel(p.id);
+/** Atributos do produto: os da ficha e “Da época”, quando se aplica. */
+export const etiquetas = (p) => [...(daEpoca(p) ? ['Da época'] : []), ...(p.etiquetas || [])];
+export const TODAS_ETIQUETAS = ['Da época', ...new Set(PRODUTOS.flatMap((p) => p.etiquetas || []))];
 
 /* ---------- dinheiro e quantidades ---------- */
 const moeda = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' });
@@ -57,7 +81,7 @@ export function totalFisico(p, n) {
 }
 /** Formato curto do cartão: “Molho de 500 g”, “Unidade (c. 1 kg)”, “Cabaz com 6 artigos” */
 export function formato(p) {
-  if (p.composicao) return `Cabaz com ${p.composicao.length} artigos`;
+  if (p.composicao) return `Cabaz com ${contaItens(p.composicao)} artigos`;
   const [s, , m, lig = 'de'] = p.u;
   if (!m) return 'Unidade';
   if (lig === '(') return `Unidade (${m})`;
@@ -68,27 +92,31 @@ export const nomesProdutores = (p) => p.produtores.map((id) => produtor.get(id).
 /* ---------- pesquisa (sem acentos, por produto, banca e produtor) ---------- */
 export const normalizar = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-–—/.,;:()«»"']/g, ' ').replace(/\s+/g, ' ').trim();
 const SINONIMOS = { padaria: 'pao paes', 'ovos-e-lacticinios': 'leite queijo', 'ervas-aromaticas': 'erva ervas tempero', fruta: 'frutas', horticolas: 'legumes verduras horta', mercearia: 'despensa', 'conservas-e-doces': 'doce compota frasco', cabazes: 'cabaz caixa' };
+const VAZIAS = new Set(['para', 'com', 'que', 'uma', 'dos', 'das', 'por', 'mais', 'como', 'sem', 'num', 'numa', 'aos', 'nas', 'nos', 'ate']);
 const indice = PRODUTOS.map((p) => {
   const b = banca.get(p.banca);
   const nome = normalizar(p.nome);
-  const resto = normalizar([b.nome, SINONIMOS[p.banca] || '', ...nomesProdutores(p)].join(' '));
-  return { p, nome, palavrasNome: nome.split(' '), palavras: (nome + ' ' + resto).split(' ') };
+  const resto = normalizar([b.nome, SINONIMOS[p.banca] || '', ...nomesProdutores(p), ...(p.etiquetas || [])].join(' '));
+  const desc = normalizar(`${p.descricao} ${p.ingredientes || ''}`).split(' ').filter((w) => w.length > 3 && !VAZIAS.has(w));
+  return { p, nome, palavrasNome: nome.split(' '), palavras: (nome + ' ' + resto).split(' '), desc };
 });
 const prefixo = (palavras, t) => palavras.some((w) => w.startsWith(t));
 
-/** Devolve produtos ordenados por relevância. */
+/** Devolve produtos ordenados por relevância: nome, depois banca/produtor/atributos, depois descrição. */
 export function pesquisarProdutos(q) {
   const termos = normalizar(q).split(' ').filter(Boolean);
   if (!termos.length) return [];
   const res = [];
   for (const e of indice) {
-    if (!termos.every((t) => prefixo(e.palavras, t))) continue;
-    let pont = 0;
+    let pont = 0, falhou = false;
     for (const t of termos) {
-      if (e.palavrasNome[0].startsWith(t)) pont += 6;
-      else if (prefixo(e.palavrasNome, t)) pont += 4;
-      else pont += 1;
+      if (e.palavrasNome[0].startsWith(t)) pont += 8;
+      else if (prefixo(e.palavrasNome, t)) pont += 6;
+      else if (prefixo(e.palavras, t)) pont += 3;
+      else if (t.length > 3 && prefixo(e.desc, t)) pont += 1;
+      else { falhou = true; break; }
     }
+    if (falhou) continue;
     if (e.p.banca === 'cabazes') pont -= 1;
     res.push([pont, e.p]);
   }

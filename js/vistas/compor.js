@@ -37,18 +37,19 @@ export function compor({ params }) {
     <div class="compor__cab">
       <h1 class="pagina-titulo">Compor o meu cabaz</h1>
       <p class="pagina-lead">Junta artigos de qualquer banca. O preço da caixa é a soma dos artigos que lá estão.</p>
+      <ol class="etapas compor__etapas" aria-label="Como funciona"><li><b>1</b>Escolher</li><li><b>2</b>Compor</li><li><b>3</b>Acompanhar</li><li><b>4</b>Finalizar</li></ol>
       ${aviso ? `<p class="aviso">${esc(aviso)}</p>` : ''}
       <p class="aviso aviso--edicao" data-aviso-edicao hidden></p>
     </div>
     <section class="partidas" aria-labelledby="partidas-titulo">
-      <h2 id="partidas-titulo" class="partidas__titulo">1. Ponto de partida</h2>
+      <h2 id="partidas-titulo" class="partidas__titulo">1. Escolher um ponto de partida</h2>
       <ul class="partidas__lista">${C.PARTIDAS.map((pt) => `<li><button type="button" class="partida" data-partida="${pt.id}" aria-pressed="false">
         <span class="partida__marca" aria-hidden="true">${icone('visto')}</span><strong>${esc(pt.nome)}</strong><span>${esc(pt.resumo)}</span>
         <span class="partida__n">${pt.itens.length ? `${C.contaItens(pt.itens)} artigos · ${C.euros(C.somaItens(pt.itens))}` : '0 artigos · 0,00 €'}</span></button></li>`).join('')}</ul>
     </section>
     <div class="compor__corpo">
       <section class="compor__loja" aria-labelledby="loja-titulo">
-        <h2 id="loja-titulo" class="partidas__titulo">2. Escolhe nas bancas</h2>
+        <h2 id="loja-titulo" class="partidas__titulo">2. Compor, banca a banca</h2>
         <div class="separadores" role="tablist" aria-label="Bancas">${BANCAS_LOJA.map((b) => `<button type="button" role="tab" id="sep-${b.id}" class="separador" aria-controls="painel-banca" data-banca="${b.id}">${icone(b.icone)}<span>${esc(b.nome)}</span><span class="separador__n" data-n-banca="${b.id}"></span></button>`).join('')}</div>
         <div class="painel-banca" id="painel-banca" role="tabpanel" tabindex="0" data-painel></div>
       </section>
@@ -78,6 +79,7 @@ export function compor({ params }) {
     function linhaProduto(p) {
       const q = qtd(p.id);
       const nome = esc(p.nome);
+      if (!C.disponivel(p.id)) return `<li class="linha-p is-fora"><span class="linha-p__img">${img(C.imagemProduto(p.id), '', 600, 450)}</span><span class="linha-p__txt"><strong>${nome}</strong><span>Fora de época · ${esc(C.disponibilidade(p).nota.toLowerCase())}</span></span><span class="linha-p__preco preco-txt">${C.euros(p.preco)}</span><span class="linha-p__acao"><span class="indisponivel">Indisponível</span></span></li>`;
       return `<li class="linha-p${q ? ' is-na-caixa' : ''}">
         <span class="linha-p__img">${img(C.imagemProduto(p.id), '', 600, 450)}</span>
         <span class="linha-p__txt"><strong>${nome}</strong><span>${esc(C.formato(p))} · ${esc(C.nomesProdutores(p).join(', '))}</span></span>
@@ -109,7 +111,7 @@ export function compor({ params }) {
       const vazio = !s.itens.length;
       const g = s.gid && E.grupo(s.gid);
       const mudou = g && JSON.stringify(g.itens) !== JSON.stringify(s.itens);
-      return `${suf === 'm' ? `<div class="painel__cab"><h2 class="painel__titulo" id="resumo-titulo-${suf}" tabindex="-1">A tua caixa</h2><button type="button" class="icone-btn" data-fechar-resumo>${icone('fechar')}<span class="sr-only">Fechar resumo</span></button></div>` : `<h2 class="resumo__titulo" id="resumo-titulo-${suf}" tabindex="-1">3. A tua caixa</h2>`}
+      return `${suf === 'm' ? `<div class="painel__cab"><h2 class="painel__titulo" id="resumo-titulo-${suf}" tabindex="-1">A tua caixa</h2><button type="button" class="icone-btn" data-fechar-resumo>${icone('fechar')}<span class="sr-only">Fechar resumo</span></button></div>` : `<h2 class="resumo__titulo" id="resumo-titulo-${suf}" tabindex="-1">3. Acompanhar a caixa</h2>`}
         <div class="resumo__corpo">
           ${caixaViva(suf)}
           <label class="campo campo--compacto"><span class="campo__rotulo">Nome</span><input class="campo__entrada" data-nome value="${esc(s.nome)}" maxlength="60" autocomplete="off"></label>
@@ -129,7 +131,8 @@ export function compor({ params }) {
           <button type="button" class="btn btn--linha btn--bloco" data-guardar${vazio ? ' disabled' : ''}>${icone('guardar')}${s.cid ? 'Guardar alterações…' : 'Guardar composição…'}</button>
           ${!vazio ? '<button type="button" class="ligacao-btn" data-esvaziar>Esvaziar a caixa</button>' : ''}
         </div>
-        <p class="resumo__estado" data-estado role="status"></p>`;
+        <p class="resumo__estado" data-estado role="status"></p>
+        <div class="resumo__seguir">${g ? `<p class="partidas__titulo" style="margin:0">4. Finalizar</p><a class="btn btn--linha btn--bloco" href="${L('/encomenda')}">Rever encomenda${icone('seta-dir')}</a>` : ''}</div>`;
     }
     function desenharResumo() {
       $$('[data-resumo]', raiz).forEach((el) => {

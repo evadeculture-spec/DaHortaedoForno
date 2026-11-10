@@ -11,6 +11,7 @@ import { produtores, perfil } from './vistas/produtores.js';
 import { receitas, receita } from './vistas/receitas.js';
 import { compor } from './vistas/compor.js';
 import { cabazes, guardados, favoritos, marca, naoEncontrado } from './vistas/paginas.js';
+import { encomenda, conta, ajuda, legal } from './vistas/apoio.js';
 
 rota('/', inicio);
 rota('/mercado', (a) => mercado(a));
@@ -26,6 +27,10 @@ rota('/receitas', receitas);
 rota('/receitas/:id', receita);
 rota('/favoritos', favoritos);
 rota('/a-marca', marca);
+rota('/encomenda', encomenda);
+rota('/conta', conta);
+rota('/ajuda', ajuda);
+rota('/legal', legal);
 
 const app = $('[data-app]');
 let limpar = null;
@@ -68,6 +73,7 @@ function render(o = {}) {
   limpar = null;
   app.className = 'app ' + (v.classe || '');
   app.innerHTML = v.html;
+  if (!o.inicial && !o.manterPosicao) { void app.offsetWidth; app.classList.add('is-a-entrar'); }
   document.title = v.titulo;
   protegerImagens(app);
   limpar = v.montar ? v.montar(app) : null;

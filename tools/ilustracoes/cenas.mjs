@@ -21,7 +21,7 @@ export function produtos(cabazScene) {
   for (const p of PRODUTOS) {
     const ctx = new Ctx('p' + p.id.replace(/[^a-z]/g, '').slice(0, 10));
     let body;
-    if (p.id === 'cabaz-da-horta' || p.id === 'cabaz-pao-e-horta') {
+    if (p.id === 'cabaz-pao-e-horta') {
       body = g(cabazScene(ctx, { withSetting: false, contents: p.id === 'cabaz-da-horta' ? 'horta' : 'misto' }), 0, 0, 1);
       const vb = p.id === 'cabaz-da-horta' ? '40 230 880 660' : '40 200 880 660';
       total += escrever(PROD, p.id + '.svg', svgDoc({ w: 600, h: 450, vb, title: p.alt, ctx, body: tinta(ctx, sombra(ctx, 520, 700, 340, 30) + body) }));
@@ -35,7 +35,7 @@ export function produtos(cabazScene) {
 
 /* ═════════ naturezas-mortas das bancas e coleção (640×400, recortadas sobre creme) ═════════ */
 const COMPOSICOES = {
-  horticolas: [['couve-portuguesa', 340, 300, 0.58], ['abobora-manteiga', 200, 350, 0.62], ['tomate-coracao-de-boi', 470, 372, 0.5], ['cenouras-com-rama', 330, 392, 0.56]],
+  horticolas: [['couve-portuguesa', 340, 300, 0.58], ['abobora-manteiga', 200, 350, 0.62], ['beterraba', 470, 380, 0.5], ['cenouras-com-rama', 330, 392, 0.56]],
   fruta: [['pera-rocha', 230, 316, 0.62], ['laranja', 420, 322, 0.58], ['roma', 320, 380, 0.56], ['maca-bravo-de-esmolfe', 170, 392, 0.5]],
   'ervas-aromaticas': [['alecrim', 330, 300, 0.7], ['manjericao', 300, 352, 0.66], ['coentros', 360, 400, 0.66]],
   padaria: [['pao-de-centeio', 360, 300, 0.6], ['pao-fermentacao-lenta', 230, 340, 0.62], ['broa-de-milho', 410, 392, 0.58], ['carcacas-de-trigo', 170, 398, 0.46]],
@@ -71,20 +71,20 @@ function caixote(ctx, x, y, w, h, d, conteudo) {
   return s;
 }
 
-/* ═════════ A. banca panorâmica (1400×640) ═════════ */
+/* ═════════ A. banca panorâmica (1400×760): o forno é o protagonista, a banca fica à frente ═════════ */
 export function panorama() {
   const ctx = new Ctx('banca');
   let s = '';
   // plano de fundo: parede, azulejos, arco do forno e prateleiras
-  s += P.tiles(ctx, { x: 420, y: 168, w: 560, h: 150, size: 46 });
-  s += `<path d="M420 168H980" ${S(2)}/>`;
-  s += g(P.ovenArch(ctx, { r: 132 }), 760, 300, 1);
+  s += P.tiles(ctx, { x: 1090, y: 312, w: 320, h: 138, size: 46 });
+  s += `<path d="M1090 312H1400" ${S(2)}/>`;
+  s += g(P.ovenArch(ctx, { r: 188 }), 760, 448, 1);
   // prateleiras de madeira à esquerda
   const tabua = (y) => `<path d="${poly([[30, y], [410, y], [420, y + 16], [24, y + 16]])}" fill="#B98A57" stroke="${C.ink}" stroke-width="2.4" stroke-linejoin="round"/><path d="M40 ${y + 8}H404" ${S(1.2, '#7E5A30')} opacity="0.7"/><path d="M60 ${y + 16}v26l18 -26M380 ${y + 16}v26l-18 -26" ${S(3, '#7E5A30')}/>`;
-  s += `<rect x="24" y="40" width="396" height="350" fill="#E9DFCB"/>` + hatched(ctx, 'M24 40H420V390H24Z', { angle: 0, gap: 9, width: 1, opacity: 0.2 });
-  s += tabua(170) + tabua(320);
-  s += semSombra(() => [['pao-de-centeio', 130, 168, 0.36], ['pao-fermentacao-lenta', 250, 166, 0.34], ['pao-de-mistura', 350, 168, 0.32], ['regueifa', 120, 318, 0.32], ['pao-de-alfarroba', 230, 318, 0.32], ['fogaca', 330, 318, 0.3]].map(([id, x, y, k]) => item(ctx, id, x, y, k)).join(''));
-  // bancada de pedra
+  s += tabua(290) + tabua(440);
+  s += semSombra(() => [['pao-de-centeio', 130, 288, 0.36], ['pao-fermentacao-lenta', 250, 286, 0.34], ['pao-de-mistura', 350, 288, 0.32], ['regueifa', 120, 438, 0.32], ['pao-de-alfarroba', 230, 438, 0.32], ['fogaca', 330, 438, 0.3]].map(([id, x, y, k]) => item(ctx, id, x, y, k)).join(''));
+  // bancada de pedra (tudo o que está pousado nela desce 120 px em relação ao desenho original)
+  s += '<g transform="translate(0 120)">';
   const mid = ctx.id('fs'), gid = ctx.id('fg');
   ctx.defs.push(`<linearGradient id="${gid}" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.07" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="${mid}" maskUnits="userSpaceOnUse" x="0" y="380" width="1400" height="260"><rect x="0" y="380" width="1400" height="260" fill="url(#${gid})"/></mask>`);
   s += `<g mask="url(#${mid})"><path d="M0 392H1400V600H0Z" fill="${C.stone}"/><path d="M0 600H1400V632H0Z" fill="${C.stoneDark}"/><path d="M0 392H1400M0 600H1400M0 632H1400" ${S(2.6)}/>${hatched(ctx, 'M0 600H1400V632H0Z', { angle: 90, gap: 5, opacity: 0.25 })}</g>`;
@@ -105,8 +105,9 @@ export function panorama() {
   s += g(P.peel(ctx, { len: 300, angle: 8 }), 300, 618, 0.8, -4) + `<g opacity="0.85">${[[250, 612], [262, 606], [276, 616], [292, 610], [240, 620]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${C.ivory}"/>`).join('')}</g>`;
   s += P.crumbs(83, 4, [380, 600, 160, 20]);
   s += semSombra(() => fruta(ctx, 'pera', 960, 616, 28, 9));
+  s += '</g>';
   const body = tinta(ctx, s);
-  const n = escrever(ILU, 'banca-mercado.svg', svgDoc({ w: 1400, h: 640, title: 'Banca de mercado: prateleiras com pães, broa cortada, caixas de peras e laranjas, cenouras, couve e a caixa kraft da marca, com o arco do forno ao fundo.', ctx, body }));
+  const n = escrever(ILU, 'banca-mercado.svg', svgDoc({ w: 1400, h: 760, title: 'Banca de mercado: prateleiras com pães, broa cortada, caixas de peras e laranjas, cenouras, couve e a caixa kraft da marca, com o arco do forno ao fundo.', ctx, body }));
   console.log('banca panorâmica', (n / 1024).toFixed(0), 'KB');
 }
 

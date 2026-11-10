@@ -118,7 +118,7 @@ export function marca() {
     <div class="marca-pg__colunas">
       <section><h2 class="secao-titulo secao-titulo--solto">Como funciona</h2>
         <p>Cada produtor tem uma banca. Podes comprar artigo a artigo, levar um cabaz pronto com conteúdo indicado, ou compor o teu cabaz e guardá-lo para outra semana.</p>
-        <p>Nesta demonstração a recolha e a entrega são simuladas: escolhes a modalidade na revisão da encomenda, vês o custo antes de concluir, e nada é cobrado.</p></section>
+        <p>Os frescos seguem a época: o que não é do mês fica fora da banca até voltar. A entrega e o pagamento não fazem parte desta demonstração, por isso não há portes nem prazos.</p></section>
       <section><h2 class="secao-titulo secao-titulo--solto">A identidade</h2>
         <p>O símbolo é um forno a lenha com a horta à frente. A paleta tem quatro cores: verde-floresta para o texto e as ações, creme e marfim para o papel, terracota para o tijolo, a chama e a crosta.</p>
         <ul class="paleta" aria-label="Paleta">
@@ -129,7 +129,7 @@ export function marca() {
         </ul>
         <p>As cenas editoriais são gravuras a duas tintas; os produtos são desenhados com as suas cores naturais para se escolherem pelo aspeto.</p></section>
     </div>
-    <p class="aviso">${icone('visto')}Demonstração de conceito. Produtos, produtores, regiões, preços, disponibilidades e modalidades de recolha são ilustrativos. Não há pagamentos, encomendas nem recolha de dados pessoais.</p>
+    <p class="aviso">${icone('visto')}Demonstração de conceito. Produtos, produtores, regiões, preços e disponibilidades são ilustrativos. Não há pagamentos, encomendas nem recolha de dados pessoais.</p>
   </div>`;
   return { titulo: 'A marca — Da Horta e do Forno', html, classe: 'pg-marca' };
 }

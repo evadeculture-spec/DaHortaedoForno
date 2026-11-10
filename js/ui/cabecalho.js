@@ -11,6 +11,7 @@ export function criarPesquisa(contentor, id, aoEscolher = () => {}) {
     <span class="pesquisa__icone" aria-hidden="true">${icone('lupa')}</span>
     <input id="${id}" class="pesquisa__campo" type="search" name="q" autocomplete="off" spellcheck="false" enterkeyhint="search"
       placeholder="Pesquisar pão, fruta, produtores…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-lista">
+    <button class="pesquisa__limpar" type="button" data-limpar-pesquisa hidden>${icone('fechar')}<span class="sr-only">Limpar pesquisa</span></button>
     <button class="pesquisa__ir" type="submit"><span class="sr-only">Pesquisar</span>${icone('seta-dir')}</button>
     <div class="sugestoes" id="${id}-lista" role="listbox" aria-label="Sugestões de pesquisa" hidden></div>
   </form>`;
@@ -40,7 +41,10 @@ export function criarPesquisa(contentor, id, aoEscolher = () => {}) {
     campo.setAttribute('aria-expanded', 'true');
     marcar(-1);
   }
-  campo.addEventListener('input', sugerir);
+  const limpar = $('[data-limpar-pesquisa]', contentor);
+  const verLimpar = () => { limpar.hidden = !campo.value; };
+  limpar.addEventListener('click', () => { campo.value = ''; verLimpar(); fechar(); campo.focus(); });
+  campo.addEventListener('input', () => { verLimpar(); sugerir(); });
   campo.addEventListener('focus', () => { if (campo.value.trim().length >= 2) sugerir(); });
   campo.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -63,7 +67,7 @@ export function criarPesquisa(contentor, id, aoEscolher = () => {}) {
     ir(q ? `/pesquisa?q=${encodeURIComponent(q)}` : '/mercado');
   });
   campo.addEventListener('blur', () => setTimeout(() => { if (!contentor.contains(document.activeElement)) fechar(); }, 120));
-  return { campo, definir: (v) => { campo.value = v || ''; } };
+  return { campo, definir: (v) => { campo.value = v || ''; verLimpar(); } };
 }
 
 /* ───────── navegação principal ───────── */
@@ -87,14 +91,14 @@ function cabazesHTML() {
 export function desenharNav() {
   const nav = $('[data-nav]');
   nav.innerHTML = `<div class="wrap"><ul class="nav">
-    <li class="nav__item"><button type="button" class="nav__btn" aria-expanded="false" aria-controls="mega-mercado" data-sub="mega-mercado" data-secao="mercado">Mercado${icone('chevron-baixo')}</button></li>
+    <li class="nav__item"><button type="button" class="nav__btn" aria-expanded="false" aria-controls="mega-mercado" data-sub="mega-mercado" data-secao="mercado">Mercado${icone('chevron-baixo')}</button>
+      <div class="mega" id="mega-mercado" hidden>${megaHTML()}</div></li>
     <li class="nav__item nav__item--rel"><button type="button" class="nav__btn" aria-expanded="false" aria-controls="menu-cabazes" data-sub="menu-cabazes" data-secao="cabazes">Cabazes${icone('chevron-baixo')}</button>
       <div class="submenu" id="menu-cabazes" hidden>${cabazesHTML()}</div></li>
     <li><a class="nav__link" href="${L('/produtores')}" data-secao="produtores">Produtores</a></li>
     <li><a class="nav__link" href="${L('/receitas')}" data-secao="receitas">Receitas</a></li>
     <li><a class="nav__link" href="${L('/a-marca')}" data-secao="a-marca">A marca</a></li>
-  </ul></div>
-  <div class="mega" id="mega-mercado" hidden>${megaHTML()}</div>`;
+  </ul></div>`;
   let aberto = null;
   const fechar = (devolver) => {
     if (!aberto) return;
@@ -145,6 +149,7 @@ export function iniciarPainel() {
         <li><button type="button" class="painel__link" data-nivel="cabazes">${icone('caixa')}<span>Cabazes</span>${icone('chevron-dir')}</button></li>
         ${item('/produtores', `${icone('pin')}<span>Produtores</span>`)}${item('/receitas', `${icone('relogio')}<span>Receitas</span>`)}${item('/a-marca', `${icone('forno')}<span>A marca</span>`)}
         ${item('/favoritos', `${icone('coracao')}<span>Favoritos</span><span class="painel__n">${E.favoritos().length}</span>`)}
+        ${item('/conta', `${icone('pessoa')}<span>A minha área</span>`)}${item('/ajuda', `${icone('visto')}<span>Ajuda</span>`)}
       </ul>`;
     } else if (nivel === 'mercado') {
       corpo = C.GRUPOS_MERCADO.map((g) => `<p class="painel__grupo">${esc(g.nome)}</p><ul class="painel__lista">${C.BANCAS.filter((b) => b.grupo === g.id).map((b) => item('/mercado/' + b.id, `${icone(b.icone)}<span>${esc(b.nome)}</span><span class="painel__n">${n(b.id)}</span>`)).join('')}</ul>`).join('') +
@@ -199,13 +204,14 @@ export function compactarAoDescer() {
 export function desenharRodape() {
   const li = (h, t) => `<li><a href="${L(h)}">${esc(t)}</a></li>`;
   $('[data-rodape]').innerHTML = `<div class="wrap rodape__in">
-    <div class="rodape__marca"><img src="assets/brand/logotipo-vertical-negativo.svg" width="553" height="379" alt="Da Horta e do Forno" loading="lazy"><p>Hortícolas, fruta, pão de forno, despensa e cabazes de pequenos produtores portugueses.</p></div>
+    <div class="rodape__marca"><img src="assets/brand/logotipo-vertical-negativo.svg" width="553" height="379" alt="Da Horta e do Forno" loading="lazy"><p>Da terra e do forno, para a tua mesa.</p></div>
     <nav class="rodape__nav" aria-label="Rodapé">
-      <div><h2 class="rodape__titulo">Comprar</h2><ul>${li('/mercado', 'Mercado')}${li('/cabazes', 'Cabazes prontos')}${li('/cabazes/compor', 'Compor o meu cabaz')}${li('/cabazes/guardados', 'Cabazes guardados')}${li('/favoritos', 'Favoritos')}<li><button type="button" data-abrir-cesto>Cesto</button></li></ul></div>
-      <div><h2 class="rodape__titulo">Descobrir</h2><ul>${li('/produtores', 'Produtores')}${li('/receitas', 'Receitas')}${li('/mercado?colecao=outono', 'A banca de outono')}${li('/pesquisa', 'Pesquisar')}</ul></div>
-      <div><h2 class="rodape__titulo">Sobre a marca</h2><ul>${li('/a-marca', 'A marca')}${li('/a-marca', 'Recolha e entrega (simuladas)')}</ul></div>
+      <div><h2 class="rodape__titulo">Comprar</h2><ul>${li('/mercado', 'Mercado')}${li('/cabazes', 'Cabazes prontos')}${li('/cabazes/compor', 'Compor o meu cabaz')}${li('/mercado?atributo=' + encodeURIComponent('Da época'), 'Da época')}<li><button type="button" data-abrir-cesto>Cesto</button></li></ul></div>
+      <div><h2 class="rodape__titulo">Descobrir</h2><ul>${li('/produtores', 'Produtores')}${li('/receitas', 'Receitas')}${li('/mercado?colecao=outono', 'A banca de outono')}${li('/a-marca', 'A marca')}</ul></div>
+      <div><h2 class="rodape__titulo">A minha área</h2><ul>${li('/conta', 'Resumo')}${li('/favoritos', 'Favoritos')}${li('/cabazes/guardados', 'Cabazes guardados')}${li('/encomenda', 'Rever encomenda')}</ul></div>
+      <div><h2 class="rodape__titulo">Apoio e legal</h2><ul>${li('/ajuda', 'Ajuda')}${li('/legal', 'Privacidade e termos')}</ul></div>
     </nav>
-    <p class="rodape__nota">Demonstração de conceito. Produtos, produtores, preços, disponibilidades e modalidades de recolha são ilustrativos. Não há pagamentos, encomendas nem recolha de dados pessoais.</p>
+    <div class="rodape__base"><p>Demonstração de conceito. Produtos, produtores, preços e disponibilidades são ilustrativos. Não há pagamentos, encomendas nem recolha de dados pessoais.</p>
+      <p>Contactos, apoio ao cliente e redes sociais ainda não existem: este protótipo não tem canais de atendimento.</p></div>
   </div>`;
-  void href;
 }

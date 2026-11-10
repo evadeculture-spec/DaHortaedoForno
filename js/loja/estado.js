@@ -1,6 +1,6 @@
 // Estado da loja: cesto (artigos e cabazes compostos), favoritos e composições guardadas.
 // Guardado no navegador quando possível; migra o cesto do primeiro protótipo (dhf-cesto-v1).
-import { produto, preco, somaItens, ehCabaz } from './catalogo.js';
+import { produto, preco, somaItens, ehCabaz, disponivel } from './catalogo.js';
 
 const K = { cesto: 'dhf-cesto-v2', antigo: 'dhf-cesto-v1', fav: 'dhf-favoritos-v1', comp: 'dhf-composicoes-v1', rascunho: 'dhf-rascunho-v1' };
 export const MAX = 20;
@@ -12,19 +12,19 @@ const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } c
 const remover = (k) => { try { localStorage.removeItem(k); } catch (e) { /* idem */ } };
 const uid = (p) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const itensValidos = (itens) => (Array.isArray(itens) ? itens : [])
-  .filter((x) => Array.isArray(x) && produto.has(x[0]) && !ehCabaz(x[0]) && Number.isInteger(x[1]) && x[1] > 0)
+  .filter((x) => Array.isArray(x) && produto.has(x[0]) && !ehCabaz(x[0]) && disponivel(x[0]) && Number.isInteger(x[1]) && x[1] > 0)
   .map(([id, q]) => [id, Math.min(q, MAX)]);
 
 function carregarCesto() {
   const v2 = ler(K.cesto, null);
   if (v2 && Array.isArray(v2.linhas)) {
-    return v2.linhas.filter((l) => (l.tipo === 'produto' ? produto.has(l.id) && l.qtd > 0 : l.tipo === 'composicao' && itensValidos(l.itens).length))
+    return v2.linhas.filter((l) => (l.tipo === 'produto' ? produto.has(l.id) && disponivel(l.id) && l.qtd > 0 : l.tipo === 'composicao' && itensValidos(l.itens).length))
       .map((l) => (l.tipo === 'produto' ? { tipo: 'produto', id: l.id, qtd: Math.min(l.qtd | 0, MAX) } : { ...l, itens: itensValidos(l.itens), qtd: Math.min(Math.max(1, l.qtd | 0), MAX) }));
   }
   // migração simples do protótipo anterior: {id: quantidade}
   const v1 = ler(K.antigo, null);
   if (v1 && typeof v1 === 'object') {
-    const linhas = Object.entries(v1).filter(([id, q]) => produto.has(id) && Number.isInteger(q) && q > 0).map(([id, q]) => ({ tipo: 'produto', id, qtd: Math.min(q, MAX) }));
+    const linhas = Object.entries(v1).filter(([id, q]) => produto.has(id) && disponivel(id) && Number.isInteger(q) && q > 0).map(([id, q]) => ({ tipo: 'produto', id, qtd: Math.min(q, MAX) }));
     gravar(K.cesto, { linhas });
     remover(K.antigo);
     return linhas;
@@ -62,7 +62,7 @@ export const subtotal = () => s.linhas.reduce((t, l) => t + precoLinha(l), 0);
 export const grupo = (gid) => s.linhas.find((l) => l.tipo === 'composicao' && l.gid === gid);
 
 export function definirProduto(id, qtd) {
-  qtd = Math.max(0, Math.min(MAX, qtd | 0));
+  qtd = disponivel(id) ? Math.max(0, Math.min(MAX, qtd | 0)) : 0;
   const i = s.linhas.findIndex((l) => l.tipo === 'produto' && l.id === id);
   if (i < 0 && qtd > 0) s.linhas.push({ tipo: 'produto', id, qtd });
   else if (i >= 0 && qtd === 0) s.linhas.splice(i, 1);
@@ -74,6 +74,7 @@ export const adicionarProduto = (id, n = 1) => definirProduto(id, qtdProduto(id)
 /** Adiciona vários produtos numa só ação (receitas). */
 export function adicionarVarios(pares) {
   for (const [id, n] of pares) {
+    if (!disponivel(id)) continue;
     const l = s.linhas.find((x) => x.tipo === 'produto' && x.id === id);
     if (l) l.qtd = Math.min(MAX, l.qtd + n);
     else s.linhas.push({ tipo: 'produto', id, qtd: Math.min(MAX, n) });
@@ -105,6 +106,12 @@ export function definirGrupo(gid, qtd) {
 export function limparCesto() {
   s.linhas = [];
   mudou({ cesto: true });
+}
+
+export function apagarTudo() {
+  s.linhas = []; s.favoritos = []; s.composicoes = [];
+  remover(K.rascunho);
+  mudou({ cesto: true, fav: true, comp: true });
 }
 
 /* ---------- favoritos ---------- */

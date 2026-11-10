@@ -27,6 +27,8 @@ function lerEstado(params, bancaFixa) {
     preco: PRECOS.some((x) => x.id === params.get('preco')) ? params.get('preco') : '',
     ordem: ORDENS.some((x) => x.id === params.get('ordem')) ? params.get('ordem') : 'relevancia',
     colecao: C.colecao.has(params.get('colecao')) ? params.get('colecao') : '',
+    atributos: lista(params.get('atributo')).filter((a) => C.TODAS_ETIQUETAS.includes(a)),
+    disp: params.get('disponivel') === '1',
     mostrar: Math.max(PASSO, parseInt(params.get('mostrar') || PASSO, 10) || PASSO),
   };
 }
@@ -37,6 +39,8 @@ function paramsDe(e, bancaFixa) {
   if (e.produtores.length) p.set('produtor', e.produtores.join(','));
   if (e.preco) p.set('preco', e.preco);
   if (e.colecao) p.set('colecao', e.colecao);
+  if (e.atributos.length) p.set('atributo', e.atributos.join(','));
+  if (e.disp) p.set('disponivel', '1');
   if (e.ordem !== 'relevancia') p.set('ordem', e.ordem);
   if (e.mostrar > PASSO) p.set('mostrar', e.mostrar);
   return p;
@@ -51,6 +55,8 @@ function base(e) {
 function filtrar(e) {
   let res = base(e);
   if (e.produtores.length) res = res.filter((p) => p.produtores.some((x) => e.produtores.includes(x)));
+  if (e.atributos.length) res = res.filter((p) => { const t = C.etiquetas(p); return e.atributos.every((a) => t.includes(a)); });
+  if (e.disp) res = res.filter((p) => C.disponivel(p.id));
   const f = PRECOS.find((x) => x.id === e.preco);
   if (f && f.id) res = res.filter((p) => p.preco >= f.min && p.preco < f.max);
   const col = new Intl.Collator('pt');
@@ -59,12 +65,14 @@ function filtrar(e) {
   if (e.ordem === 'preco-desc') res.sort((a, b) => b.preco - a.preco || col.compare(a.nome, b.nome));
   return res;
 }
-const nFiltros = (e, fixa) => (fixa ? 0 : e.bancas.length) + e.produtores.length + (e.preco ? 1 : 0) + (e.colecao ? 1 : 0);
+const nFiltros = (e, fixa) => (fixa ? 0 : e.bancas.length) + e.produtores.length + (e.preco ? 1 : 0) + (e.colecao ? 1 : 0) + e.atributos.length + (e.disp ? 1 : 0);
 const artigos = (n) => (n === 1 ? '1 artigo' : `${n} artigos`);
 
 function formFiltros(e, fixa, sufixo) {
   // produtores relevantes para o conjunto atual (sem os filtros de produtor/preço)
-  const prods = [...new Set(base({ ...e, produtores: [], preco: '' }).flatMap((p) => p.produtores))].map((id) => C.produtor.get(id)).sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
+  const conj = base({ ...e, produtores: [], preco: '' });
+  const atrs = C.TODAS_ETIQUETAS.filter((a) => e.atributos.includes(a) || conj.some((p) => C.etiquetas(p).includes(a)));
+  const prods = [...new Set(conj.flatMap((p) => p.produtores))].map((id) => C.produtor.get(id)).sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
   return `<form class="filtros-form" data-form-filtros onsubmit="return false">
     ${fixa ? `<div class="filtros__grupo"><p class="filtros__titulo">Banca</p><p class="filtros__fixa">${esc(C.banca.get(fixa).nome)} · <a href="${L('/mercado')}">ver todas</a></p></div>` : `
     <fieldset class="filtros__grupo"><legend class="filtros__titulo">Banca</legend>
@@ -73,6 +81,12 @@ function formFiltros(e, fixa, sufixo) {
     <fieldset class="filtros__grupo"><legend class="filtros__titulo">Produtor</legend>
       ${prods.map((pr) => `<label class="opcao"><input type="checkbox" name="produtor" value="${pr.id}"${e.produtores.includes(pr.id) ? ' checked' : ''}><span class="opcao__caixa" aria-hidden="true">${icone('visto')}</span><span>${esc(pr.nome)}</span></label>`).join('')}
     </fieldset>
+    <fieldset class="filtros__grupo"><legend class="filtros__titulo">Disponibilidade</legend>
+      <label class="opcao"><input type="checkbox" name="disp" value="1"${e.disp ? ' checked' : ''}><span class="opcao__caixa" aria-hidden="true">${icone('visto')}</span><span>Só o que há agora<small>Esconde o que está fora de época</small></span></label>
+    </fieldset>
+    ${atrs.length ? `<fieldset class="filtros__grupo"><legend class="filtros__titulo">Atributos</legend>
+      ${atrs.map((a) => `<label class="opcao"><input type="checkbox" name="atributo" value="${esc(a)}"${e.atributos.includes(a) ? ' checked' : ''}><span class="opcao__caixa" aria-hidden="true">${icone('visto')}</span><span>${esc(a)}</span></label>`).join('')}
+    </fieldset>` : ''}
     <fieldset class="filtros__grupo"><legend class="filtros__titulo">Preço</legend>
       ${PRECOS.map((x) => `<label class="opcao opcao--radio"><input type="radio" name="preco${sufixo}" value="${x.id}"${e.preco === x.id ? ' checked' : ''}><span class="opcao__caixa" aria-hidden="true"></span><span>${esc(x.nome)}</span></label>`).join('')}
     </fieldset>
@@ -95,13 +109,14 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
       <form class="pesquisa-pagina" role="search" data-form-pesquisa-pagina>
         <label class="sr-only" for="q-pagina">Termo de pesquisa</label>
         <input id="q-pagina" type="search" name="q" value="${esc(e.q)}" placeholder="Pesquisar pão, fruta, produtores…" autocomplete="off">
+        ${e.q ? `<a class="btn btn--linha" href="${L('/pesquisa')}">${icone('fechar')}Limpar</a>` : ''}
         <button class="btn btn--primario" type="submit">${icone('lupa')}Pesquisar</button>
       </form>
     </div>`;
   } else if (b) {
     const prods = [...new Set(C.produtosDaBanca(b.id).flatMap((p) => p.produtores))].map((id) => C.produtor.get(id));
     cab = `<div class="catalogo__cab catalogo__cab--banca">
-      <div class="catalogo__cab-img">${img(C.imagemBanca(b.id), '', 640, 400, { prioridade: true })}</div>
+      <div class="catalogo__cab-img"><span class="arco arco--deitado" data-tinta="${b.id}"><span class="arco__vao">${img(C.imagemBanca(b.id), '', 640, 400, { prioridade: true })}</span></span></div>
       <div><p class="sobretitulo">${icone(b.icone)}Banca ${String(C.BANCAS.indexOf(b) + 1).padStart(2, '0')} de 08</p>
       <h1 class="pagina-titulo">${esc(b.nome)}</h1><p class="catalogo__resumo">${esc(b.resumo)}</p>
       <p class="catalogo__produtores">De ${prods.map((p) => `<a href="${L('/produtores/' + p.id)}">${esc(p.nome)}</a>`).join(', ').replace(/, ([^,]*)$/, ' e $1')}</p></div>
@@ -112,7 +127,7 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
       <div><p class="sobretitulo">Seleção</p><h1 class="pagina-titulo">${esc(col.nome)}</h1><p class="catalogo__resumo">${esc(col.resumo)}</p></div>
     </div>`;
   } else {
-    cab = `<div class="catalogo__cab"><h1 class="pagina-titulo">Mercado</h1><p class="catalogo__resumo">${C.PRODUTOS.length} artigos em ${C.BANCAS.length} bancas, de ${C.PRODUTORES.length} produtores. Filtra por banca, produtor ou preço.</p>
+    cab = `<div class="catalogo__cab"><h1 class="pagina-titulo">Mercado</h1><p class="catalogo__resumo">${C.PRODUTOS.length} artigos em ${C.BANCAS.length} bancas, de ${C.PRODUTORES.length} produtores. Filtra por banca, produtor, disponibilidade, atributos ou preço.</p>
       <ul class="bancas-chips">${C.BANCAS.map((x) => `<li><a class="chip-link" href="${L('/mercado/' + x.id)}">${icone(x.icone)}${esc(x.nome)}</a></li>`).join('')}</ul></div>`;
   }
 
@@ -126,7 +141,7 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
           <p class="barra__n" data-n aria-live="polite"></p>
           <div class="barra__acoes">
             <button class="btn btn--linha btn--peq barra__filtros" type="button" data-abrir-filtros aria-haspopup="dialog">${icone('filtro')}<span data-txt-filtros>Filtros</span></button>
-            <label class="ordenar"><span>Ordenar</span><select data-ordem>${ORDENS.map((o) => `<option value="${o.id}"${o.id === e.ordem ? ' selected' : ''}>${o.nome}</option>`).join('')}</select></label>
+            <label class="ordenar"><span>Ordenar</span><select data-ordem>${ORDENS.map((o) => `<option value="${o.id}"${o.id === e.ordem ? ' selected' : ''}>${o.id === 'relevancia' && !e.q ? 'Ordem das bancas' : o.nome}</option>`).join('')}</select></label>
           </div>
         </div>
         <div class="ativos" data-ativos></div>
@@ -169,6 +184,8 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
       e.produtores.forEach((id) => chips.push(['produtor', id, C.produtor.get(id).nome]));
       if (e.preco) chips.push(['preco', e.preco, PRECOS.find((x) => x.id === e.preco).nome]);
       if (e.colecao) chips.push(['colecao', e.colecao, C.colecao.get(e.colecao).nome]);
+      e.atributos.forEach((a) => chips.push(['atributo', a, a]));
+      if (e.disp) chips.push(['disp', '1', 'Só o que há agora']);
       $('[data-ativos]', raiz).innerHTML = chips.length ? `<ul class="ativos__lista" aria-label="Filtros ativos">${chips.map(([k, v, t]) => `<li><button type="button" class="chip-ativo" data-remover="${k}" data-valor="${esc(v)}">${esc(t)}${icone('fechar')}<span class="sr-only">: remover filtro</span></button></li>`).join('')}<li><button type="button" class="ligacao-btn" data-limpar>Limpar filtros</button></li></ul>` : '';
       // vazio
       const vazio = $('[data-vazio]', raiz);
@@ -189,6 +206,8 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
       $$('[data-form-filtros]', raiz).forEach((f) => {
         $$('input[name="banca"]', f).forEach((i) => { i.checked = e.bancas.includes(i.value); });
         $$('input[name="produtor"]', f).forEach((i) => { i.checked = e.produtores.includes(i.value); });
+        $$('input[name="atributo"]', f).forEach((i) => { i.checked = e.atributos.includes(i.value); });
+        $$('input[name="disp"]', f).forEach((i) => { i.checked = e.disp; });
         $$('input[type="radio"]', f).forEach((i) => { i.checked = i.value === e.preco; });
       });
     }
@@ -200,6 +219,8 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
       if (!t.closest('[data-form-filtros]')) return;
       if (t.name === 'banca') e.bancas = $$('input[name="banca"]:checked', t.form).map((i) => i.value);
       if (t.name === 'produtor') e.produtores = $$('input[name="produtor"]:checked', t.form).map((i) => i.value);
+      if (t.name === 'atributo') e.atributos = $$('input[name="atributo"]:checked', t.form).map((i) => i.value);
+      if (t.name === 'disp') e.disp = t.checked;
       if (t.type === 'radio') e.preco = t.value;
       mudar();
     });
@@ -212,11 +233,13 @@ export function mercado({ params, banca: bancaFixa = null, modo = 'mercado' }) {
         if (k === 'produtor') e.produtores = e.produtores.filter((x) => x !== v);
         if (k === 'preco') e.preco = '';
         if (k === 'colecao') e.colecao = '';
+        if (k === 'atributo') e.atributos = e.atributos.filter((x) => x !== v);
+        if (k === 'disp') e.disp = false;
         mudar();
         ($('[data-ativos] button', raiz) || $('[data-n]', raiz)).focus?.();
       } else if (t.matches('[data-limpar]')) {
         if (!bancaFixa) e.bancas = [];
-        e.produtores = []; e.preco = ''; e.colecao = '';
+        e.produtores = []; e.preco = ''; e.colecao = ''; e.atributos = []; e.disp = false;
         mudar();
         if (!dlg.open) $('[data-ordem]', raiz).focus();
       } else if (t.matches('[data-mais]')) {

@@ -1,23 +1,15 @@
-// Gaveta do cesto: artigos e cabazes compostos, revisão com recolha simulada e conclusão da demonstração.
+// Gaveta do cesto: artigos e cabazes compostos, com quantidades e subtotal. A revisão é a página /encomenda.
 import * as C from '../loja/catalogo.js';
 import * as E from '../loja/estado.js';
 import { navegar } from '../router.js';
 import { esc, L, icone, img, $, $$, anunciar, protegerImagens } from './comum.js';
 
-const RECOLHAS = [
-  { id: 'banca', nome: 'Recolher na banca', detalhe: 'Mercado do Largo, sábado, 9h–13h', custo: 0 },
-  { id: 'casa', nome: 'Entrega em casa', detalhe: 'Num raio de 15 km, sábado à tarde', custo: 390 },
-];
-
-let vista = 'cesto';
-let recolha = 'banca';
 let abertos = new Set();
 let origem = null;
 const dlg = () => $('[data-gaveta-cesto]');
 
 export function abrirCesto(de) {
   origem = de || document.activeElement;
-  vista = 'cesto';
   desenhar();
   const d = dlg();
   if (!d.open) d.showModal();
@@ -26,7 +18,6 @@ export function abrirCesto(de) {
 export function iniciarCesto() {
   const d = dlg();
   d.addEventListener('close', () => {
-    if (vista === 'concluido') vista = 'cesto';
     if (d.dataset.semRetorno) { delete d.dataset.semRetorno; return; }
     if (origem?.isConnected) origem.focus({ preventScroll: true });
   });
@@ -37,15 +28,7 @@ export function iniciarCesto() {
     if (b.matches('[data-fechar]')) return d.close();
     if (b.matches('a[href]')) { d.dataset.semRetorno = '1'; d.close(); return; } // o router trata a navegação
     if (b.matches('[data-ir-mercado]')) { d.dataset.semRetorno = '1'; d.close(); navegar('/mercado'); return; }
-    if (b.matches('[data-rever]')) { vista = 'revisao'; desenhar(); return $('[data-titulo-vista]', d).focus(); }
-    if (b.matches('[data-voltar]')) { vista = 'cesto'; desenhar(); return $('#cesto-titulo', d).focus(); }
-    if (b.matches('[data-concluir]')) {
-      E.limparCesto();
-      vista = 'concluido';
-      desenhar();
-      $('[data-msg-final]', d).focus();
-      return anunciar('Demonstração concluída. Não foi efetuada qualquer cobrança ou encomenda.');
-    }
+    if (b.matches('[data-rever]')) { d.dataset.semRetorno = '1'; d.close(); navegar('/encomenda'); return; }
     if (b.matches('[data-expandir]')) {
       const g = b.dataset.expandir;
       abertos.has(g) ? abertos.delete(g) : abertos.add(g);
@@ -80,10 +63,7 @@ export function iniciarCesto() {
       (resto[Math.min(pos, resto.length - 1)]?.querySelector('[data-l="remover"]') || $('[data-ir-mercado]', d) || $('#cesto-titulo', d)).focus();
     }
   });
-  d.addEventListener('change', (e) => {
-    if (e.target.name === 'recolha') { recolha = e.target.value; desenhar(); $(`input[value="${recolha}"]`, d).focus(); }
-  });
-  E.ouvir((o) => { if (o.cesto && d.open && vista !== 'concluido') desenhar(); });
+  E.ouvir((o) => { if (o.cesto && d.open) desenhar(); });
 }
 
 function linhaHTML(l) {
@@ -118,35 +98,14 @@ function desenhar() {
   const d = dlg();
   const ls = E.linhas();
   const n = E.unidades();
-  const titulo = vista === 'revisao' ? 'Rever encomenda' : vista === 'concluido' ? 'Demonstração concluída' : 'O teu cesto';
+  const titulo = 'O teu cesto';
   let corpo = '', base = '';
-  if (vista === 'concluido') {
-    corpo = `<div class="cesto-fim"><span class="cesto-fim__marca">${icone('visto')}</span><p class="cesto-fim__msg" tabindex="-1" data-msg-final>Demonstração concluída. Não foi efetuada qualquer cobrança ou encomenda.</p><p class="cesto-fim__nota">O cesto foi esvaziado. Os favoritos e os cabazes guardados continuam guardados.</p></div>`;
-    base = `<button type="button" class="btn btn--primario btn--bloco" data-ir-mercado>Voltar ao mercado</button>`;
-  } else if (!ls.length) {
-    vista = 'cesto';
+  if (!ls.length) {
     corpo = `<div class="cesto-vazio">${img('assets/ilustracoes/cabaz-vazio.svg', '', 900, 640)}<p>O teu cesto ainda está vazio</p><button type="button" class="btn btn--primario" data-ir-mercado>Explorar o mercado</button><a class="ligacao" href="${L('/cabazes/compor')}">Compor o meu cabaz${icone('seta-dir')}</a></div>`;
-  } else if (vista === 'revisao') {
-    const prods = ls.filter((l) => l.tipo === 'produto');
-    const grupos = ls.filter((l) => l.tipo === 'composicao');
-    const prontos = prods.filter((l) => C.ehCabaz(l.id));
-    const avulsos = prods.filter((l) => !C.ehCabaz(l.id));
-    const r = RECOLHAS.find((x) => x.id === recolha);
-    const sec = (t, arr, fn) => (arr.length ? `<h4 class="revisao__sec">${t}</h4><ul class="revisao__lista">${arr.map(fn).join('')}</ul>` : '');
-    const linP = (l) => { const p = C.produto.get(l.id); return `<li><span class="revisao__q">${l.qtd}×</span><span>${esc(p.nome)}<small>${esc(C.unidades(p, l.qtd))} · ${C.euros(p.preco)} cada</small></span><span class="preco-txt">${C.euros(E.precoLinha(l))}</span></li>`; };
-    const linG = (l) => `<li><span class="revisao__q">${l.qtd}×</span><span>${esc(l.nome)}<small>Cabaz composto: ${l.itens.map(([id, q]) => `${q > 1 ? q + ' × ' : ''}${esc(C.produto.get(id).nome)}`).join(', ')}</small></span><span class="preco-txt">${C.euros(E.precoLinha(l))}</span></li>`;
-    corpo = `<h3 class="revisao__titulo" tabindex="-1" data-titulo-vista>Resumo da encomenda</h3>
-      ${sec('Produtos', avulsos, linP)}${sec('Cabazes prontos', prontos, linP)}${sec('Cabazes compostos', grupos, linG)}
-      <fieldset class="recolha"><legend class="revisao__sec">Recolha (simulada)</legend>
-        ${RECOLHAS.map((x) => `<label class="opcao opcao--radio opcao--bloco"><input type="radio" name="recolha" value="${x.id}"${x.id === recolha ? ' checked' : ''}><span class="opcao__caixa" aria-hidden="true"></span><span><strong>${esc(x.nome)}</strong> · ${x.custo ? C.euros(x.custo) : 'sem custo'}<small>${esc(x.detalhe)}. Simulação: não é pedida morada nem outros dados.</small></span></label>`).join('')}
-      </fieldset>
-      <p class="aviso">${icone('visto')}Demonstração de conceito. Produtos, produtores, preços, disponibilidades e recolha são ilustrativos. Ao concluir não é feita qualquer cobrança nem encomenda.</p>`;
-    base = `<dl class="totais"><div><dt>Subtotal (${n} ${n === 1 ? 'unidade' : 'unidades'})</dt><dd class="preco-txt">${C.euros(E.subtotal())}</dd></div><div><dt>${esc(r.nome)} (simulado)</dt><dd class="preco-txt">${r.custo ? C.euros(r.custo) : '0,00 €'}</dd></div><div class="totais__total"><dt>Total</dt><dd class="preco-txt" data-total-final>${C.euros(E.subtotal() + r.custo)}</dd></div></dl>
-      <div class="gaveta__acoes"><button type="button" class="btn btn--primario btn--bloco" data-concluir>${icone('visto')}Concluir demonstração</button><button type="button" class="btn btn--linha btn--bloco" data-voltar>${icone('seta-esq')}Voltar ao cesto para editar</button></div>`;
   } else {
     corpo = `<ul class="linhas">${ls.map(linhaHTML).join('')}</ul>`;
     base = `<dl class="totais"><div class="totais__total"><dt>Subtotal <small>${n} ${n === 1 ? 'unidade' : 'unidades'}</small></dt><dd class="preco-txt" data-subtotal>${C.euros(E.subtotal())}</dd></div></dl>
-      <div class="gaveta__acoes"><button type="button" class="btn btn--primario btn--bloco" data-rever>Rever encomenda${icone('seta-dir')}</button></div>`;
+      <div class="gaveta__acoes"><button type="button" class="btn btn--primario btn--bloco" data-rever>Rever encomenda${icone('seta-dir')}</button><button type="button" class="btn btn--linha btn--bloco" data-fechar>Continuar a comprar</button></div>`;
   }
   d.innerHTML = `<div class="gaveta__painel">
     <div class="painel__cab"><h2 class="painel__titulo" id="cesto-titulo" tabindex="-1">${titulo}</h2><button type="button" class="icone-btn" data-fechar>${icone('fechar')}<span class="sr-only">Fechar cesto</span></button></div>

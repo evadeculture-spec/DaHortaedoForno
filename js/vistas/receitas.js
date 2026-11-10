@@ -37,6 +37,7 @@ export function receita({ id }) {
         <ul class="ingr-lista">${r.ingredientes.map((ig, i) => {
           if (!ig.produto) return `<li class="ingr ingr--casa"><span class="ingr__marca" aria-hidden="true"></span><span class="ingr__txt"><span class="ingr__receita">${esc(ig.texto)}</span><span class="ingr__compra">Não se vende no mercado</span></span></li>`;
           const p = C.produto.get(ig.produto);
+          if (!C.disponivel(p.id)) return `<li class="ingr ingr--casa"><span class="ingr__marca" aria-hidden="true"></span><span class="ingr__txt"><span class="ingr__receita">${esc(ig.texto)}</span><span class="ingr__compra"><a href="${L('/produto/' + p.id)}">${esc(p.nome)}</a>: fora de época · ${esc(C.disponibilidade(p).nota.toLowerCase())}</span></span></li>`;
           return `<li class="ingr"><label class="ingr__rotulo"><input type="checkbox" data-ingr="${i}"><span class="ingr__marca" aria-hidden="true">${icone('visto')}</span>
             <span class="ingr__txt"><span class="ingr__receita">${esc(ig.texto)}</span>
             <span class="ingr__compra">No cesto: ${esc(C.unidades(p, ig.compra))} · ${esc(p.nome)} · <strong class="preco-txt">${C.euros(p.preco * ig.compra)}</strong></span></span></label>

@@ -11,7 +11,19 @@
  *   ['molho', 'molhos', '500 g']         → “1 molho de 500 g”, “2 molhos de 500 g (1 kg)”
  *   ['couve', 'couves', 'c. 1 kg', '(']  → “1 couve (c. 1 kg)”
  *   ['cabaz', 'cabazes']                 → “1 cabaz”
+ *
+ * Modelo de cada produto (campos derivados são preenchidos no fim deste ficheiro):
+ *   id / slug · nome · banca · produtores[] · preco (cêntimos) · u (unidade comercial)
+ *   curta (primeira frase) · descricao (completa) · alt · epoca · ingredientes · conservacao
+ *   alergenios[] · etiquetas[] · origem · composicao (cabazes) · par (relação editorial)
+ *
+ * DADOS DE DEMONSTRAÇÃO: todos os produtos, produtores, regiões, preços, épocas, ingredientes,
+ * alergénios e disponibilidades deste ficheiro são ilustrativos.
  */
+
+/** Mês em que “decorre” o mercado de demonstração (11 = novembro). A disponibilidade dos
+ *  frescos é calculada a partir da época de cada produto e deste mês. */
+export const MES_DO_MERCADO = 11;
 
 export const BANCAS = [
   { id: 'horticolas', nome: 'Hortícolas', grupo: 'frescos', icone: 'horta', resumo: 'Raízes, folhas e frutos da horta, colhidos na véspera.' },
@@ -79,7 +91,7 @@ export const PRODUTORES = [
 ];
 
 // p(id, nome, banca, produtores, preçoCêntimos, unidade, descrição, alt, extra)
-const p = (id, nome, banca, produtores, preco, u, descricao, alt, extra = {}) => ({ id, nome, banca, produtores, preco, u, descricao, alt, ...extra });
+const p = (id, nome, banca, produtores, preco, u, descricao, alt, extra = {}) => ({ id, slug: id, nome, banca, produtores, preco, u, curta: descricao.split(/(?<=\.)\s/)[0], descricao, alt, ...extra });
 const HR = ['horta-da-ribeira'], PL = ['padaria-do-largo'], PE = ['pomar-da-encosta'], EC = ['ervas-da-courela'];
 const CV = ['celeiro-da-varzea'], LF = ['lagar-do-freixo'], CF = ['cozinha-da-fonte'], QS = ['queijaria-da-serra'], QO = ['quinta-do-outeiro'];
 
@@ -134,7 +146,7 @@ export const PRODUTOS = [
   p('laranja', 'Laranja', 'fruta', PE, 300, ['saco', 'sacos', '2 kg'],
     'Laranja de casca fina, boa para sumo e para comer à mão. Apanhada já madura, sem tratamento depois da colheita.',
     'Laranjas de casca rugosa, uma delas com uma folha verde no pé.',
-    { epoca: 'Dezembro a maio', conservacao: 'Em local fresco, até duas semanas.', par: { produto: 'mel-multifloral', nota: 'Sumo de laranja com uma colher de mel.' } }),
+    { epoca: 'Novembro a maio', conservacao: 'Em local fresco, até duas semanas.', par: { produto: 'mel-multifloral', nota: 'Sumo de laranja com uma colher de mel.' } }),
   p('clementina', 'Clementina', 'fruta', PE, 260, ['saco', 'sacos', '1 kg'],
     'Clementinas pequenas e achatadas, sem grainhas, que se descascam com os dedos.',
     'Clementinas pequenas e achatadas, com folhas presas a uma delas.',
@@ -352,13 +364,13 @@ export const PRODUTOS = [
 
   /* ───────── CABAZES ───────── */
   p('cabaz-da-horta', 'Cabaz da horta', 'cabazes', HR, 1650, ['cabaz', 'cabazes'],
-    'Uma caixa com os hortícolas da semana da Horta da Ribeira, escolhidos para uma semana de sopas e saladas.',
-    'Caixa de cartão com a marca, com couve, tomates e cenouras com rama.',
-    { composicao: [['cenouras-com-rama', 1], ['couve-portuguesa', 1], ['tomate-coracao-de-boi', 1], ['alho-frances', 1], ['batata-vermelha', 1], ['espinafres', 1], ['curgete', 1], ['beterraba', 1]] }),
+    'Uma caixa com os hortícolas de novembro da Horta da Ribeira, escolhidos para uma semana de sopas e assados.',
+    'Caixa de cartão com a marca, com couve, abóbora-manteiga, beterrabas e cenouras com rama.',
+    { composicao: [['cenouras-com-rama', 2], ['couve-portuguesa', 1], ['abobora-manteiga', 1], ['alho-frances', 1], ['batata-vermelha', 1], ['espinafres', 1], ['beterraba', 1]] }),
   p('cabaz-pao-e-horta', 'Cabaz de pão e horta', 'cabazes', ['horta-da-ribeira', 'padaria-do-largo'], 2100, ['cabaz', 'cabazes'],
     'Um pão de fermentação lenta e uma broa da Padaria do Largo, com seis hortícolas da Horta da Ribeira, numa só caixa.',
     'Caixa de cartão com a marca, com pão num saco de papel, broa, couve e cenouras com rama.',
-    { composicao: [['pao-fermentacao-lenta', 1], ['broa-de-milho', 1], ['cenouras-com-rama', 1], ['couve-portuguesa', 1], ['tomate-coracao-de-boi', 1], ['alho-frances', 1], ['batata-vermelha', 1], ['espinafres', 1]], estudo: true }),
+    { composicao: [['pao-fermentacao-lenta', 1], ['broa-de-milho', 1], ['cenouras-com-rama', 1], ['couve-portuguesa', 1], ['abobora-manteiga', 1], ['alho-frances', 1], ['batata-vermelha', 1], ['espinafres', 1]], estudo: true }),
   p('cabaz-de-fruta', 'Cabaz de fruta', 'cabazes', PE, 1490, ['cabaz', 'cabazes'],
     'Fruta do Pomar da Encosta para uma semana: maçã, pera, laranja, clementina, dióspiro e uma romã.',
     'Caixa de cartão com a marca, cheia de maçãs, peras, laranjas e uma romã.',
@@ -377,17 +389,48 @@ export const PRODUTOS = [
     { composicao: [['azeite-virgem-extra', 1], ['grao-de-bico-seco', 1], ['feijao-frade', 1], ['feijao-manteiga', 1], ['arroz-carolino', 1], ['farinha-de-milho', 1], ['amendoa-com-pele', 1]] }),
   p('cabaz-de-ervas', 'Cabaz de ervas', 'cabazes', EC, 620, ['cabaz', 'cabazes'],
     'Seis molhos de aromáticas da Ervas da Courela, para uma semana de cozinha com cheiro.',
-    'Caixa de cartão com molhos de coentros, salsa, hortelã, alecrim, tomilho e manjericão.',
-    { composicao: [['coentros', 1], ['salsa-frisada', 1], ['hortela', 1], ['alecrim', 1], ['tomilho', 1], ['manjericao', 1]] }),
-  p('cabaz-para-dois', 'Cabaz para dois', 'cabazes', ['padaria-do-largo', 'queijaria-da-serra', 'horta-da-ribeira', 'pomar-da-encosta', 'cozinha-da-fonte'], 2350, ['cabaz', 'cabazes'],
-    'Um jantar de petiscos para duas pessoas: pão, queijo de cabra, compota de figo, tomate, espinafres e peras.',
-    'Caixa de cartão com pão, queijo de cabra, frasco de compota, tomates e peras.',
-    { composicao: [['pao-fermentacao-lenta', 1], ['queijo-de-cabra-curado', 1], ['compota-de-figo', 1], ['tomate-coracao-de-boi', 1], ['espinafres', 1], ['pera-rocha', 1]] }),
+    'Caixa de cartão com molhos de coentros, salsa, hortelã, alecrim, tomilho e salva.',
+    { composicao: [['coentros', 1], ['salsa-frisada', 1], ['hortela', 1], ['alecrim', 1], ['tomilho', 1], ['salva', 1]] }),
+  p('cabaz-para-dois', 'Cabaz para dois', 'cabazes', ['padaria-do-largo', 'queijaria-da-serra', 'horta-da-ribeira', 'pomar-da-encosta', 'cozinha-da-fonte', 'lagar-do-freixo'], 2350, ['cabaz', 'cabazes'],
+    'Um jantar de petiscos para duas pessoas: pão, queijo de cabra, compota de figo, nozes, espinafres e peras.',
+    'Caixa de cartão com pão, queijo de cabra, frasco de compota, nozes e peras.',
+    { composicao: [['pao-fermentacao-lenta', 1], ['queijo-de-cabra-curado', 1], ['compota-de-figo', 1], ['nozes-em-casca', 1], ['espinafres', 1], ['pera-rocha', 1]] }),
   p('cabaz-de-oferta', 'Cabaz de oferta', 'cabazes', ['lagar-do-freixo', 'pomar-da-encosta', 'cozinha-da-fonte', 'queijaria-da-serra'], 4150, ['cabaz', 'cabazes'],
     'Uma caixa para oferecer com azeite, mel, marmelada, compota de figo, queijo de ovelha amanteigado e nozes.',
     'Caixa de cartão com garrafa de azeite, mel, marmelada, compota, queijo e nozes.',
     { composicao: [['azeite-virgem-extra', 1], ['mel-multifloral', 1], ['marmelada', 1], ['compota-de-figo', 1], ['queijo-de-ovelha-amanteigado', 1], ['nozes-em-casca', 1]] }),
 ];
+
+/* Alergénios (ilustrativos), por produto. Os cabazes herdam os dos artigos que contêm. */
+const ALERGENIOS = {
+  'pao-fermentacao-lenta': ['Glúten (trigo)'], 'broa-de-milho': ['Glúten (centeio)'], 'pao-de-centeio': ['Glúten (centeio, trigo)'],
+  'pao-de-mistura': ['Glúten (trigo, centeio)'], 'pao-de-sementes': ['Glúten (trigo)', 'Sésamo'], 'carcacas-de-trigo': ['Glúten (trigo)'],
+  'pao-de-alfarroba': ['Glúten (trigo)'], fogaca: ['Glúten (trigo)', 'Ovos', 'Leite'], regueifa: ['Glúten (trigo)', 'Ovos', 'Leite'],
+  'amendoa-com-pele': ['Frutos de casca rija (amêndoa)'], 'nozes-em-casca': ['Frutos de casca rija (noz)'],
+  'doce-de-abobora': ['Frutos de casca rija (noz)'], 'pera-em-calda': ['Sulfitos (vinho branco)'], 'pepino-em-conserva': ['Mostarda', 'Sulfitos (vinagre de vinho)'],
+  'ovos-de-galinha': ['Ovos'], 'ovos-de-codorniz': ['Ovos'], 'queijo-fresco-de-vaca': ['Leite'], 'queijo-de-cabra-curado': ['Leite'],
+  'queijo-de-ovelha-amanteigado': ['Leite'], requeijao: ['Leite'], 'iogurte-natural': ['Leite'], 'iogurte-de-ovelha': ['Leite'], 'manteiga-com-sal': ['Leite'],
+};
+/* Atributos fundamentados na própria ficha (descrição ou ingredientes de cada produto). */
+const ETIQUETAS = {
+  'Forno a lenha': ['pao-fermentacao-lenta', 'broa-de-milho', 'pao-de-centeio', 'pao-de-mistura', 'pao-de-sementes', 'carcacas-de-trigo', 'pao-de-alfarroba', 'fogaca', 'regueifa'],
+  'Massa-mãe': ['pao-fermentacao-lenta', 'pao-de-centeio', 'pao-de-sementes', 'pao-de-alfarroba'],
+  'Leite cru': ['queijo-de-cabra-curado', 'queijo-de-ovelha-amanteigado'],
+  'Ar livre': ['ovos-de-galinha', 'ovos-de-codorniz'],
+  'Pequenos lotes': ['doce-de-abobora', 'compota-de-figo', 'marmelada', 'doce-de-tomate', 'compota-de-ameixa', 'pera-em-calda', 'pepino-em-conserva'],
+  'Extração a frio': ['azeite-virgem-extra'],
+  'Mó de pedra': ['farinha-de-milho'],
+  'Frasco retornável': ['iogurte-natural'],
+};
+const porId = new Map(PRODUTOS.map((x) => [x.id, x]));
+for (const x of PRODUTOS) {
+  x.etiquetas = Object.keys(ETIQUETAS).filter((e) => ETIQUETAS[e].includes(x.id));
+  x.origem = [...new Set(x.produtores.map((id) => PRODUTORES.find((pr) => pr.id === id).regiao))].join(', ');
+  x.alergenios = x.composicao
+    ? [...new Set(x.composicao.flatMap(([id]) => ALERGENIOS[id] || []).map((a) => a.replace(/ \(.*\)$/, '')))]
+    : ALERGENIOS[x.id] || [];
+}
+void porId;
 
 /* Coleções editoriais (mostradas no megamenu e no catálogo com ?colecao=) */
 export const COLECOES = [
@@ -404,7 +447,7 @@ export const PARTIDAS = [
   { id: 'vazio', nome: 'Começar vazio', resumo: 'Uma caixa vazia. Escolhe tudo à tua maneira.', itens: [] },
   {
     id: 'semana', nome: 'Para a semana', resumo: 'Pão, horta, ovos, iogurte e fruta para uma semana a dois.',
-    itens: [['pao-fermentacao-lenta', 1], ['cenouras-com-rama', 1], ['couve-portuguesa', 1], ['tomate-coracao-de-boi', 1], ['batata-vermelha', 1], ['ovos-de-galinha', 1], ['iogurte-natural', 2], ['laranja', 1]],
+    itens: [['pao-fermentacao-lenta', 1], ['cenouras-com-rama', 1], ['couve-portuguesa', 1], ['abobora-manteiga', 1], ['batata-vermelha', 1], ['ovos-de-galinha', 1], ['iogurte-natural', 2], ['laranja', 1]],
   },
   {
     id: 'oferta', nome: 'Para oferecer', resumo: 'Despensa e queijo, para levar a casa de alguém.',

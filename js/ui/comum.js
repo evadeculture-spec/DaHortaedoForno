@@ -12,7 +12,7 @@ export const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 /** Imagem com dimensões reservadas; diferida por omissão. */
 export function img(src, alt, w, h, { cls = '', prioridade = false } = {}) {
   const carga = prioridade ? 'fetchpriority="high"' : 'loading="lazy"';
-  return `<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" width="${w}" height="${h}" ${carga} decoding="async" data-protegida>`;
+  return `<img class="ske ${cls}" src="${esc(src)}" alt="${esc(alt)}" width="${w}" height="${h}" ${carga} decoding="async" data-protegida>`;
 }
 /** Alternativa visual quando uma imagem falha (fica a forma e o nome). */
 export function protegerImagens(raiz = document) {
@@ -25,8 +25,10 @@ export function protegerImagens(raiz = document) {
       im.setAttribute('aria-hidden', 'true');
       caixa.insertAdjacentHTML('beforeend', `<span class="img-falha" role="img" aria-label="${esc(im.alt || 'Imagem indisponível')}">${icone('cesto')}<span aria-hidden="true">${esc(im.alt ? im.alt.split(',')[0] : '')}</span></span>`);
     };
-    im.addEventListener('error', falhar, { once: true });
-    if (im.complete && im.naturalWidth === 0 && im.getAttribute('src')) falhar();
+    const pronta = () => im.classList.add('is-ok');
+    im.addEventListener('error', () => { pronta(); falhar(); }, { once: true });
+    im.addEventListener('load', pronta, { once: true });
+    if (im.complete) { pronta(); if (im.naturalWidth === 0 && im.getAttribute('src')) falhar(); }
   });
 }
 
@@ -56,7 +58,14 @@ export function darPeso() {
 }
 
 /* ---------- controlo de compra: “Adicionar” que passa a seletor de quantidade ---------- */
+export function selo(p, { sempre = false } = {}) {
+  const d = C.disponibilidade(p);
+  if (d.estado === 'disponivel' && !sempre) return '';
+  const cls = d.estado === 'fim' ? ' selo--fim' : d.estado === 'fora' ? ' selo--fora' : '';
+  return `<span class="selo${cls}">${esc(d.estado === 'fora' && sempre ? `${d.rotulo} · ${d.nota.toLowerCase()}` : d.rotulo)}</span>`;
+}
 export function controloCompra(p, { rotulo = 'Adicionar' } = {}) {
+  if (!C.disponivel(p.id)) return `<span class="indisponivel">Indisponível</span>`;
   const q = E.qtdProduto(p.id);
   const nome = esc(p.nome);
   if (!q) return `<button type="button" class="btn-add" data-acao="add" data-id="${p.id}">${icone('mais')}<span>${rotulo}</span><span class="sr-only"> ${nome} ao cesto</span></button>`;
@@ -74,12 +83,13 @@ export function botaoFavorito(p, cls = 'fav') {
 /** Cartão de produto da grelha comercial. */
 export function cartao(p, { prioridade = false, cabecalho = 'h3' } = {}) {
   const prods = C.nomesProdutores(p).join(' e ');
-  return `<article class="cartao" data-produto="${p.id}">
-    <div class="cartao__media">${img(C.imagemProduto(p.id), p.alt, 600, 450, { prioridade })}</div>
+  const s = selo(p);
+  return `<article class="cartao${C.disponivel(p.id) ? '' : ' is-fora'}" data-produto="${p.id}">
+    <div class="cartao__media">${img(C.imagemProduto(p.id), p.alt, 600, 450, { prioridade })}${s ? `<span class="cartao__selo">${s}</span>` : ''}</div>
     <div class="cartao__corpo">
       <p class="cartao__produtor">${esc(prods)}</p>
       <${cabecalho} class="cartao__nome"><a href="${L('/produto/' + p.id)}">${esc(p.nome)}</a></${cabecalho}>
-      <p class="cartao__formato">${esc(C.formato(p))}</p>
+      <p class="cartao__formato">${esc(C.formato(p))}${C.disponivel(p.id) ? '' : ` · ${esc(C.disponibilidade(p).nota.toLowerCase())}`}</p>
       <div class="cartao__compra"><p class="preco">${C.euros(p.preco)}</p><div class="cartao__acao" data-compra="${p.id}">${controloCompra(p)}</div></div>
     </div>
     <div class="cartao__fav" data-fav-de="${p.id}">${botaoFavorito(p)}</div>
@@ -115,6 +125,7 @@ export function ligarCompras(raiz) {
       anunciar(on ? `${p.nome} guardado nos favoritos.` : `${p.nome} retirado dos favoritos.`);
       const novo = raiz.querySelector(`[data-fav-de="${id}"] button`) || document.querySelector(`[data-fav-de="${id}"] button`);
       novo?.focus();
+      if (on) novo?.classList.add('is-pop');
       return;
     }
     if (!['add', 'mais', 'menos'].includes(acao)) return;
@@ -132,4 +143,13 @@ export function ligarCompras(raiz) {
     const alvo = caixa && (depois === 0 ? caixa.querySelector('[data-acao="add"]') : caixa.querySelector(`[data-acao="${acao === 'menos' ? 'menos' : 'mais'}"]`) || caixa.querySelector('[data-acao="mais"]'));
     alvo?.focus();
   });
+}
+
+/** Linha de compra rápida (balcão da página inicial). */
+export function rapido(p) {
+  return `<li class="rapido" data-produto="${p.id}">
+    <span class="rapido__img">${img(C.imagemProduto(p.id), '', 600, 450, { prioridade: true })}</span>
+    <span class="rapido__txt"><a class="rapido__nome" href="${L('/produto/' + p.id)}">${esc(p.nome)}</a><span class="rapido__meta"><strong>${C.euros(p.preco)}</strong> · ${esc(C.formato(p))}</span></span>
+    <span class="rapido__acao" data-compra="${p.id}">${controloCompra(p)}</span>
+  </li>`;
 }
